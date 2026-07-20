@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { addGameAccount } from "@/app/actions";
+import { AddPlayerModal } from "@/app/add-player-modal";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +49,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-[#f7f8f3] text-[#161814]">
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-        <header className="flex flex-col gap-5 border-b border-[#d9ddcf] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <header className="flex flex-col gap-5 border-b border-[#d9ddcf] pb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase text-[#5e6b44]">
               Kingshot Accounts
@@ -57,6 +58,8 @@ export default async function Home() {
             <h1 className="mt-2 text-3xl font-semibold text-[#171a12] sm:text-4xl">
               รายชื่อผู้เล่น
             </h1>
+          </div>
+            <AddPlayerModal />
           </div>
           <div className="grid grid-cols-3 gap-3 text-center sm:min-w-80">
             <div className="border-l border-[#d9ddcf] px-4">
@@ -79,32 +82,6 @@ export default async function Home() {
             </div>
           </div>
         </header>
-
-        <form
-          action={addGameAccount}
-          className="grid gap-3 rounded-lg border border-[#d9ddcf] bg-white p-4 shadow-sm sm:grid-cols-[1fr_auto]"
-        >
-          <label className="flex min-w-0 flex-col gap-2">
-            <span className="text-sm font-semibold text-[#384030]">
-              Add user
-            </span>
-            <input
-              name="playerId"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]+"
-              required
-              placeholder="กรอกไอดีผู้เล่น"
-              className="h-11 rounded-md border border-[#cfd8bc] bg-[#fbfcf8] px-3 text-base text-[#171a12] outline-none transition-colors placeholder:text-[#8a927d] focus:border-[#748a4d]"
-            />
-          </label>
-          <button
-            type="submit"
-            className="h-11 self-end rounded-md bg-[#314a2c] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#263d22]"
-          >
-            Add user
-          </button>
-        </form>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white shadow-sm">
           <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_120px]">

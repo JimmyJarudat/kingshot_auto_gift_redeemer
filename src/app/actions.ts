@@ -1,7 +1,18 @@
 "use server";
 
+import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+
+export type GameAccountProfile = {
+  playerId: string;
+  nickname: string | null;
+  kid: number | null;
+  stoveLv: number | null;
+  stoveLvContent: number | null;
+  avatarImage: string | null;
+  totalRechargeAmount: number | null;
+};
 
 type LoginResponse = {
   code: number;
@@ -22,22 +33,49 @@ function cleanNickname(nickname: string | undefined) {
   return nickname?.replace(/\u2800/g, "").trim() || null;
 }
 
-async function fetchGameProfile(playerId: string) {
-  const loginUrl = process.env.KINGSHOT_LOGIN_URL;
+function normalizePlayerId(value: FormDataEntryValue | string | null) {
+  return String(value ?? "")
+    .replace(/\D/g, "")
+    .trim();
+}
 
-  if (!loginUrl) {
-    return null;
+function signParams(params: Record<string, string>) {
+  const secretKey = process.env.SECRET_KEY;
+
+  if (!secretKey) {
+    throw new Error("SECRET_KEY is not set");
   }
 
-  const response = await fetch(loginUrl, {
+  const raw = Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join("&");
+
+  return createHash("md5").update(raw + secretKey, "utf8").digest("hex");
+}
+
+async function fetchGameProfile(playerId: string) {
+  const playerParams = {
+    fid: playerId,
+    time: String(Date.now()),
+  };
+  const sign = signParams(playerParams);
+  const body = new URLSearchParams({
+    sign,
+    ...playerParams,
+  });
+
+  const response = await fetch("https://kingshot-giftcode.centurygame.com/api/player", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      accept: "application/json, text/plain, */*",
+      "content-type": "application/x-www-form-urlencoded",
+      origin: "https://ks-giftcode.centurygame.com",
+      referer: "https://ks-giftcode.centurygame.com/",
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0 Safari/537.36",
     },
-    body: JSON.stringify({
-      fid: Number(playerId),
-      player_id: playerId,
-    }),
+    body,
     cache: "no-store",
   });
 
@@ -54,42 +92,58 @@ async function fetchGameProfile(playerId: string) {
   return payload.data;
 }
 
-export async function addGameAccount(formData: FormData) {
-  const playerId = String(formData.get("playerId") ?? "")
-    .replace(/\D/g, "")
-    .trim();
+export async function searchGameAccount(playerIdInput: string) {
+  const playerId = normalizePlayerId(playerIdInput);
 
   if (!playerId) {
-    return;
+    throw new Error("Player ID is required");
   }
 
   const profile = await fetchGameProfile(playerId);
-  const profilePlayerId = profile?.fid ? String(profile.fid) : playerId;
+
+  return {
+    playerId: profile.fid ? String(profile.fid) : playerId,
+    nickname: cleanNickname(profile.nickname),
+    kid: profile.kid ?? null,
+    stoveLv: profile.stove_lv ?? null,
+    stoveLvContent: profile.stove_lv_content ?? null,
+    avatarImage: profile.avatar_image ?? null,
+    totalRechargeAmount: profile.total_recharge_amount ?? null,
+  } satisfies GameAccountProfile;
+}
+
+export async function importGameAccount(profile: GameAccountProfile) {
+  const playerId = normalizePlayerId(profile.playerId);
+
+  if (!playerId) {
+    throw new Error("Player ID is required");
+  }
+
   const now = new Date();
 
   await prisma.game_accounts.upsert({
     where: {
-      player_id: profilePlayerId,
+      player_id: playerId,
     },
     create: {
-      player_id: profilePlayerId,
-      nickname: cleanNickname(profile?.nickname),
-      server_id: profile?.kid ? String(profile.kid) : null,
-      kid: profile?.kid ?? null,
-      stove_lv: profile?.stove_lv ?? null,
-      stove_lv_content: profile?.stove_lv_content ?? null,
-      avatar_image: profile?.avatar_image ?? null,
-      total_recharge_amount: profile?.total_recharge_amount ?? null,
+      player_id: playerId,
+      nickname: profile.nickname,
+      server_id: profile.kid ? String(profile.kid) : null,
+      kid: profile.kid,
+      stove_lv: profile.stoveLv,
+      stove_lv_content: profile.stoveLvContent,
+      avatar_image: profile.avatarImage,
+      total_recharge_amount: profile.totalRechargeAmount,
       updated_at: now,
     },
     update: {
-      nickname: profile ? cleanNickname(profile.nickname) : undefined,
-      server_id: profile?.kid ? String(profile.kid) : undefined,
-      kid: profile?.kid ?? undefined,
-      stove_lv: profile?.stove_lv ?? undefined,
-      stove_lv_content: profile?.stove_lv_content ?? undefined,
-      avatar_image: profile?.avatar_image ?? undefined,
-      total_recharge_amount: profile?.total_recharge_amount ?? undefined,
+      nickname: profile.nickname,
+      server_id: profile.kid ? String(profile.kid) : null,
+      kid: profile.kid,
+      stove_lv: profile.stoveLv,
+      stove_lv_content: profile.stoveLvContent,
+      avatar_image: profile.avatarImage,
+      total_recharge_amount: profile.totalRechargeAmount,
       updated_at: now,
     },
   });
