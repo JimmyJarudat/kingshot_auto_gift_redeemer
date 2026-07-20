@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { addGameAccount } from "@/app/actions";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -20,15 +21,22 @@ export default async function Home() {
       nickname: true,
       server_id: true,
       is_active: true,
+      kid: true,
+      stove_lv: true,
+      stove_lv_content: true,
+      avatar_image: true,
+      total_recharge_amount: true,
     },
   });
 
   const players = accounts.map((account, index) => ({
     id: account.player_id,
     name: account.nickname?.trim() || "ไม่ระบุชื่อ",
-    server: account.server_id?.trim() || "-",
+    server: account.server_id?.trim() || (account.kid ? String(account.kid) : "-"),
     status: account.is_active ? "Active" : "Inactive",
-    avatar: avatars[index % avatars.length],
+    avatar: account.avatar_image?.trim() || avatars[index % avatars.length],
+    stoveLevel: account.stove_lv,
+    recharge: account.total_recharge_amount,
   }));
 
   const activeCount = players.filter((player) => player.status === "Active").length;
@@ -72,11 +80,38 @@ export default async function Home() {
           </div>
         </header>
 
+        <form
+          action={addGameAccount}
+          className="grid gap-3 rounded-lg border border-[#d9ddcf] bg-white p-4 shadow-sm sm:grid-cols-[1fr_auto]"
+        >
+          <label className="flex min-w-0 flex-col gap-2">
+            <span className="text-sm font-semibold text-[#384030]">
+              Add user
+            </span>
+            <input
+              name="playerId"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]+"
+              required
+              placeholder="กรอกไอดีผู้เล่น"
+              className="h-11 rounded-md border border-[#cfd8bc] bg-[#fbfcf8] px-3 text-base text-[#171a12] outline-none transition-colors placeholder:text-[#8a927d] focus:border-[#748a4d]"
+            />
+          </label>
+          <button
+            type="submit"
+            className="h-11 self-end rounded-md bg-[#314a2c] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#263d22]"
+          >
+            Add user
+          </button>
+        </form>
+
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white shadow-sm">
-          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px]">
+          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_120px]">
             <span>รูป</span>
             <span>ชื่อจากเกม</span>
             <span className="hidden sm:block">User ID</span>
+            <span className="hidden sm:block">เตา</span>
             <span className="hidden sm:block">สถานะ</span>
           </div>
 
@@ -84,7 +119,7 @@ export default async function Home() {
             <div className="divide-y divide-[#edf0e8]">
               {players.map((player) => (
               <article
-                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[104px_1.2fr_1fr_120px]"
+                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[104px_1.2fr_1fr_120px_120px]"
                 key={player.id}
               >
                 <Image
@@ -108,6 +143,9 @@ export default async function Home() {
                 </div>
                 <p className="hidden break-all font-mono text-sm text-[#384030] sm:block">
                   {player.id}
+                </p>
+                <p className="hidden text-sm font-medium text-[#384030] sm:block">
+                  {player.stoveLevel ? `Lv. ${player.stoveLevel}` : "-"}
                 </p>
                 <div className="hidden sm:block">
                   <span className="inline-flex rounded-md border border-[#cfd8bc] bg-[#f1f5e9] px-3 py-1 text-sm font-medium text-[#455431]">
