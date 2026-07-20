@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Moonlit Archer avatar</title>
+  <desc id="desc">Stylized player avatar with green hood and gold trim.</desc>
+  <rect width="128" height="128" rx="18" fill="#e7ecd9"/>
+  <circle cx="64" cy="50" r="26" fill="#384c2e"/>
+  <path d="M28 110c5-24 19-38 36-38s31 14 36 38H28Z" fill="#536b3e"/>
+  <path d="M38 54c8-24 24-36 47-34 6 12 9 23 8 35-15-9-32-9-55-1Z" fill="#7d9655"/>
+  <circle cx="55" cy="55" r="4" fill="#f8e6b4"/>
+  <circle cx="74" cy="55" r="4" fill="#f8e6b4"/>
+  <path d="M53 70c8 5 16 5 24 0" fill="none" stroke="#f8e6b4" stroke-width="5" stroke-linecap="round"/>
+  <path d="M96 28 36 91" stroke="#b28a37" stroke-width="6" stroke-linecap="round"/>
+  <path d="M90 22h18v18" fill="none" stroke="#b28a37" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

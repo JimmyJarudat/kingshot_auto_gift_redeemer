@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Ember Crown avatar</title>
+  <desc id="desc">Stylized player avatar with red cape and gold crown.</desc>
+  <rect width="128" height="128" rx="18" fill="#f2ece3"/>
+  <path d="M26 110c6-25 21-39 38-39s32 14 38 39H26Z" fill="#8c3731"/>
+  <circle cx="64" cy="55" r="27" fill="#c79266"/>
+  <path d="M42 40 52 22l12 16 13-16 10 18v12H42V40Z" fill="#c79b2e"/>
+  <circle cx="52" cy="56" r="4" fill="#3b2317"/>
+  <circle cx="76" cy="56" r="4" fill="#3b2317"/>
+  <path d="M55 73c7 5 15 5 22 0" fill="none" stroke="#6a3822" stroke-width="5" stroke-linecap="round"/>
+  <path d="M36 91c16 9 40 9 56 0" fill="none" stroke="#d7b45b" stroke-width="6" stroke-linecap="round"/>
+</svg>

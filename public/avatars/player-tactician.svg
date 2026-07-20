@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Iron Tactician avatar</title>
+  <desc id="desc">Stylized player avatar with steel helmet and blue cloak.</desc>
+  <rect width="128" height="128" rx="18" fill="#e6edf0"/>
+  <path d="M28 110c6-24 20-38 36-38s30 14 36 38H28Z" fill="#314a5d"/>
+  <circle cx="64" cy="54" r="28" fill="#d0b38b"/>
+  <path d="M36 50c3-22 16-34 39-36 12 6 19 18 21 36H36Z" fill="#77848b"/>
+  <path d="M38 48h52v10H38Z" fill="#59666d"/>
+  <rect x="41" y="55" width="16" height="7" rx="3" fill="#2c3940"/>
+  <rect x="71" y="55" width="16" height="7" rx="3" fill="#2c3940"/>
+  <path d="M55 76c7 4 14 4 21 0" fill="none" stroke="#7d5230" stroke-width="5" stroke-linecap="round"/>
+  <path d="M28 100h72" stroke="#b28a37" stroke-width="6" stroke-linecap="round"/>
+</svg>
