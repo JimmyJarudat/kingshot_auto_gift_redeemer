@@ -1,0 +1,547 @@
+{
+  "name": "Kingshot - Flow 2 Redeem API Loop + Delays",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3d4657c9-abd4-44a0-9c1a-6c7939b4eec7",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        304,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH candidate AS (\n    SELECT\n        r.id AS redemption_id,\n        gc.code AS gift_code,\n        ga.player_id,\n        ga.nickname,\n        ga.server_id\n    FROM gift_code_redemptions r\n    JOIN gift_codes gc ON gc.id = r.gift_code_id\n    JOIN game_accounts ga ON ga.id = r.game_account_id\n    WHERE r.status = 'pending'\n      AND gc.status = 'active'\n      AND ga.is_active = TRUE\n      AND (gc.expires_at IS NULL OR gc.expires_at > NOW())\n    ORDER BY r.queued_at ASC\n    FOR UPDATE OF r SKIP LOCKED\n    LIMIT 1\n),\nclaimed AS (\n    UPDATE gift_code_redemptions r\n    SET\n        status = 'processing',\n        attempt_count = attempt_count + 1,\n        updated_at = NOW()\n    FROM candidate c\n    WHERE r.id = c.redemption_id\n    RETURNING r.id\n)\nSELECT\n    c.redemption_id,\n    c.gift_code,\n    c.player_id,\n    c.nickname,\n    c.server_id\nFROM candidate c\nJOIN claimed cl ON cl.id = c.redemption_id;",
+        "options": {}
+      },
+      "id": "fd18708e-5946-4910-a810-923b67d30488",
+      "name": "Claim One Pending Job",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        608,
+        2720
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "d4tyOp9jNnFC1MME",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst SECRET_KEY = 'mN4!pQs6JrYwV9';\nconst item = $input.first().json;\n\nconst playerParams = {\n  fid: String(item.player_id),\n  time: String(Date.now()),\n};\n\nconst raw = Object.keys(playerParams)\n  .sort()\n  .map((key) => `${key}=${playerParams[key]}`)\n  .join('&');\n\nconst sign = crypto\n  .createHash('md5')\n  .update(raw + SECRET_KEY, 'utf8')\n  .digest('hex');\n\nreturn [{\n  json: {\n    ...item,\n    player_form: {\n      sign,\n      ...playerParams,\n    },\n  },\n}];"
+      },
+      "id": "5f9c524a-ee55-443b-84e0-ab0eea8e824c",
+      "name": "Sign Player Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        2720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kingshot-giftcode.centurygame.com/api/player",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json, text/plain, */*"
+            },
+            {
+              "name": "content-type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "origin",
+              "value": "https://ks-giftcode.centurygame.com"
+            },
+            {
+              "name": "referer",
+              "value": "https://ks-giftcode.centurygame.com/"
+            },
+            {
+              "name": "user-agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sign",
+              "value": "={{ $json.player_form.sign }}"
+            },
+            {
+              "name": "fid",
+              "value": "={{ $json.player_form.fid }}"
+            },
+            {
+              "name": "time",
+              "value": "={{ $json.player_form.time }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "629cf7a8-4bff-4a28-9ca7-9c328bce2a8a",
+      "name": "Verify Player",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1328,
+        2720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst SECRET_KEY = 'mN4!pQs6JrYwV9';\nconst job = $('Claim One Pending Job').first().json;\nconst response = $input.first().json;\nconst payload = response.body ?? response.data ?? response;\n\nif (Number(payload?.code) !== 0) {\n  return [{\n    json: {\n      ...job,\n      skip_redeem: true,\n      result_status: 'failed',\n      response_message: payload?.msg ?? 'Player verification failed',\n      response_data: payload,\n      http_status: response.statusCode ?? null,\n    },\n  }];\n}\n\nconst redeemParams = {\n  fid: String(job.player_id),\n  cdk: String(job.gift_code),\n  captcha_code: '',\n  time: String(Math.floor(Date.now() / 1000)),\n};\n\nconst raw = Object.keys(redeemParams)\n  .sort()\n  .map((key) => `${key}=${redeemParams[key]}`)\n  .join('&');\n\nconst sign = crypto\n  .createHash('md5')\n  .update(raw + SECRET_KEY, 'utf8')\n  .digest('hex');\n\nreturn [{\n  json: {\n    ...job,\n    skip_redeem: false,\n    player_response: payload,\n    redeem_form: {\n      sign,\n      ...redeemParams,\n    },\n  },\n}];"
+      },
+      "id": "3e36fa6d-1096-43e9-9c52-1714e0f5f56b",
+      "name": "Prepare Redeem Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        2720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "skip-condition",
+              "leftValue": "={{ $json.skip_redeem }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "88568569-0d83-481b-867b-dd3296ed1c78",
+      "name": "Player Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        2720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kingshot-giftcode.centurygame.com/api/gift_code",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json, text/plain, */*"
+            },
+            {
+              "name": "content-type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "origin",
+              "value": "https://ks-giftcode.centurygame.com"
+            },
+            {
+              "name": "referer",
+              "value": "https://ks-giftcode.centurygame.com/"
+            },
+            {
+              "name": "user-agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sign",
+              "value": "={{ $json.redeem_form.sign }}"
+            },
+            {
+              "name": "fid",
+              "value": "={{ $json.redeem_form.fid }}"
+            },
+            {
+              "name": "cdk",
+              "value": "={{ $json.redeem_form.cdk }}"
+            },
+            {
+              "name": "captcha_code",
+              "value": "={{ $json.redeem_form.captcha_code }}"
+            },
+            {
+              "name": "time",
+              "value": "={{ $json.redeem_form.time }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "53d57076-4926-4e39-b3e1-352a5cd6eb94",
+      "name": "Redeem Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2400,
+        2592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const job = $('Claim One Pending Job').first().json;\nconst http = $input.first().json;\nconst payload = http.body ?? http.data ?? http;\n\nconst code = Number(payload?.code ?? -1);\nconst errCode = Number(payload?.err_code ?? payload?.data?.err_code ?? -1);\nconst message = String(payload?.msg ?? 'Unknown response');\n\nlet status = 'failed';\n\nif (code === 0 && errCode === 20000) {\n  status = 'success';\n} else if ([40001, 40003, 40007].includes(errCode)) {\n  status = 'already_redeemed';\n} else if (errCode === 40002) {\n  status = 'expired';\n} else if (errCode === 40006) {\n  status = 'failed';\n} else if ([40102, 40103, 40104].includes(errCode)) {\n  status = 'failed';\n}\n\nreturn [{\n  json: {\n    redemption_id: job.redemption_id,\n    result_status: status,\n    response_message: message,\n    response_data: payload,\n    http_status: http.statusCode ?? null,\n    err_code: errCode,\n  },\n}];"
+      },
+      "id": "93a71469-5543-4717-a300-ab6201c958d5",
+      "name": "Classify Redeem Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        2592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE gift_code_redemptions\nSET\n    status = $1,\n    response_message = $2,\n    response_data = $3::jsonb,\n    processed_at = NOW(),\n    updated_at = NOW()\nWHERE id = $4::uuid\n  AND status = 'processing'\nRETURNING\n    id,\n    status,\n    attempt_count,\n    response_message,\n    processed_at;",
+        "options": {
+          "queryReplacement": "={{ [$json.result_status, $json.response_message, JSON.stringify($json.response_data), $json.redemption_id] }}"
+        }
+      },
+      "id": "c315b14d-9fc4-4e50-b19a-46c89145605a",
+      "name": "Save Redeem Result",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3152,
+        2592
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "d4tyOp9jNnFC1MME",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE gift_code_redemptions\nSET\n    status = 'failed',\n    response_message = $1,\n    response_data = $2::jsonb,\n    processed_at = NOW(),\n    updated_at = NOW()\nWHERE id = $3::uuid\n  AND status = 'processing'\nRETURNING\n    id,\n    status,\n    attempt_count,\n    response_message,\n    processed_at;",
+        "options": {
+          "queryReplacement": "={{ [$json.response_message, JSON.stringify($json.response_data), $json.redemption_id] }}"
+        }
+      },
+      "id": "24cb4e96-218a-40d1-952c-6ee4331dadef",
+      "name": "Save Player Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2400,
+        2832
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "d4tyOp9jNnFC1MME",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "c2b4c028-eca1-4b51-88c0-e5511531aeb5",
+      "name": "Wait 15s Before Verify API",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        2720
+      ],
+      "webhookId": "wait-before-verify-15s"
+    },
+    {
+      "parameters": {},
+      "id": "6521a15b-8838-43eb-bacb-abf38c587149",
+      "name": "Wait 5s After Login",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2128,
+        2592
+      ],
+      "webhookId": "wait-after-login-5s"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "8a8c4457-53a3-419d-99c4-569c9aa0aed7",
+      "name": "Wait 15s Before Next ID",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3360,
+        2720
+      ],
+      "webhookId": "wait-next-account-15s"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 2,
+              "triggerAtMinute": 5
+            },
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 5
+            },
+            {
+              "triggerAtHour": 14,
+              "triggerAtMinute": 5
+            },
+            {
+              "triggerAtHour": 20,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        2624
+      ],
+      "id": "5a2ae9dc-a7e8-4f33-861b-e2ac934ecb45",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Claim One Pending Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim One Pending Job": {
+      "main": [
+        [
+          {
+            "node": "Sign Player Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign Player Request": {
+      "main": [
+        [
+          {
+            "node": "Wait 15s Before Verify API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Player": {
+      "main": [
+        [
+          {
+            "node": "Prepare Redeem Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Redeem Request": {
+      "main": [
+        [
+          {
+            "node": "Player Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Player Valid?": {
+      "main": [
+        [
+          {
+            "node": "Wait 5s After Login",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Player Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redeem Code": {
+      "main": [
+        [
+          {
+            "node": "Classify Redeem Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Redeem Result": {
+      "main": [
+        [
+          {
+            "node": "Save Redeem Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15s Before Verify API": {
+      "main": [
+        [
+          {
+            "node": "Verify Player",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s After Login": {
+      "main": [
+        [
+          {
+            "node": "Redeem Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Redeem Result": {
+      "main": [
+        [
+          {
+            "node": "Wait 15s Before Next ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Player Error": {
+      "main": [
+        [
+          {
+            "node": "Wait 15s Before Next ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15s Before Next ID": {
+      "main": [
+        [
+          {
+            "node": "Claim One Pending Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Claim One Pending Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4565bba5-fbd8-43e9-b2d7-dda280b4779c",
+  "meta": {
+    "instanceId": "1b6934095a36b38b484ba73e9555d1c823660b565e517abf6d8458f98723c378"
+  },
+  "nodeGroups": [],
+  "id": "Cd3nzbOHNi4koyd7",
+  "tags": []
+}
