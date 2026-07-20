@@ -10,13 +10,18 @@ import {
 
 type SyncButtonProps = {
   playerId: string;
+  latestGiftStatus: string;
 };
 
-export function RowActions({ playerId }: SyncButtonProps) {
+export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
   const router = useRouter();
   const [syncError, setSyncError] = useState(false);
   const [sendError, setSendError] = useState(false);
-  const [sendCompleted, setSendCompleted] = useState(false);
+  const [sendLocked, setSendLocked] = useState(
+    latestGiftStatus === "success" ||
+      latestGiftStatus === "already_redeemed" ||
+      latestGiftStatus === "processing",
+  );
   const [deleteError, setDeleteError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isSyncPending, startSyncTransition] = useTransition();
@@ -38,13 +43,16 @@ export function RowActions({ playerId }: SyncButtonProps) {
   }
 
   function handleSendGift() {
+    if (sendLocked) {
+      return;
+    }
+
     setSendError(false);
-    setSendCompleted(false);
 
     startSendTransition(async () => {
       try {
         const result = await sendLatestGiftCodeToPlayer(playerId);
-        setSendCompleted(
+        setSendLocked(
           result.status === "success" || result.status === "already_redeemed",
         );
         setSendError(result.status === "failed" || result.status === "expired");
@@ -101,20 +109,20 @@ export function RowActions({ playerId }: SyncButtonProps) {
       <button
         type="button"
         onClick={handleSendGift}
-        disabled={isBusy}
+        disabled={isBusy || sendLocked}
         title={
           sendError
             ? "Send failed"
-            : sendCompleted
-              ? "Gift sent"
+            : sendLocked
+              ? "Gift already handled"
               : "Send latest gift"
         }
         aria-label="Send latest gift"
         className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
           sendError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
-            : sendCompleted
-              ? "border-[#9eb66d] bg-[#f1f7e8] text-[#4d642d]"
+            : sendLocked
+              ? "border-[#d8ddcf] bg-[#f7f8f3] text-[#8b947f]"
             : "border-[#caa35a] bg-[#fff8df] text-[#7b5d1e] hover:bg-[#f5e8b9]"
         }`}
       >
@@ -131,19 +139,6 @@ export function RowActions({ playerId }: SyncButtonProps) {
           >
             <path d="M21 12a9 9 0 0 1-9 9" />
             <path d="M3 12a9 9 0 0 1 9-9" />
-          </svg>
-        ) : sendCompleted ? (
-          <svg
-            aria-hidden="true"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6 9 17l-5-5" />
           </svg>
         ) : (
           <svg

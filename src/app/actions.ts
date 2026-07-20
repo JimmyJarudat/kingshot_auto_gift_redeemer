@@ -305,16 +305,26 @@ export async function deleteGameAccount(playerIdInput: string) {
 }
 
 export async function refreshGiftCodes() {
-  const response = await fetch("https://n8n.jarudat.com/webhook/refresh-gift-code", {
-    method: "GET",
-    cache: "no-store",
-  });
+  try {
+    const response = await fetch("https://n8n.jarudat.com/webhook/refresh-gift-code", {
+      method: "GET",
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
-    throw new Error("Gift code refresh request failed");
+    revalidatePath("/");
+
+    return {
+      ok: response.ok,
+      status: response.status,
+    };
+  } catch {
+    revalidatePath("/");
+
+    return {
+      ok: false,
+      status: 0,
+    };
   }
-
-  revalidatePath("/");
 }
 
 export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {

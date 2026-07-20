@@ -179,20 +179,17 @@ export default async function Home() {
                 className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,#d5a94855,transparent_60%)]"
               />
               <div className="relative min-w-0">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
-                      Latest Gift Code
-                    </p>
-                    <span
-                      className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold uppercase ${getGiftStatusClass(
-                        featuredGiftCode.status,
-                      )}`}
-                    >
-                      {featuredGiftCode.status}
-                    </span>
-                  </div>
-                  <RefreshGiftCodesButton />
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
+                    Latest Gift Code
+                  </p>
+                  <span
+                    className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold uppercase ${getGiftStatusClass(
+                      featuredGiftCode.status,
+                    )}`}
+                  >
+                    {featuredGiftCode.status}
+                  </span>
                 </div>
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <p className="min-w-0 break-all font-mono text-3xl font-semibold text-[#171a12] sm:text-4xl">
@@ -206,29 +203,32 @@ export default async function Home() {
                   </p>
                 ) : null}
               </div>
-              <button
-                type="button"
-                className="relative inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-[#b98a32] bg-[#171a12] px-5 text-sm font-semibold text-[#fff8df] shadow-md transition hover:bg-[#2b2f22] focus:outline-none focus:ring-2 focus:ring-[#caa35a] focus:ring-offset-2 sm:w-auto"
-                aria-label="Send latest gift code to all players"
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
+              <div className="relative flex w-full flex-col gap-3 sm:w-44">
+                <RefreshGiftCodesButton />
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-[#b98a32] bg-[#171a12] px-4 text-sm font-semibold text-[#fff8df] shadow-md transition hover:bg-[#2b2f22] focus:outline-none focus:ring-2 focus:ring-[#caa35a] focus:ring-offset-2"
+                  aria-label="Send latest gift code to all players"
                 >
-                  <path d="M20 12v10H4V12" />
-                  <path d="M2 7h20v5H2z" />
-                  <path d="M12 22V7" />
-                  <path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z" />
-                  <path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z" />
-                </svg>
-                Send Gift
-              </button>
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  >
+                    <path d="M20 12v10H4V12" />
+                    <path d="M2 7h20v5H2z" />
+                    <path d="M12 22V7" />
+                    <path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z" />
+                    <path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z" />
+                  </svg>
+                  Send Gift All
+                </button>
+              </div>
             </div>
           ) : (
             <div className="px-5 py-5">
@@ -324,7 +324,10 @@ export default async function Home() {
                   </span>
                 </div>
                 <div className="hidden sm:block">
-                  <RowActions playerId={player.id} />
+                  <RowActions
+                    playerId={player.id}
+                    latestGiftStatus={player.latestGiftStatus}
+                  />
                 </div>
               </article>
               ))}
