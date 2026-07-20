@@ -21,7 +21,7 @@ type LoginResponse = {
     nickname?: string;
     kid?: number;
     stove_lv?: number;
-    stove_lv_content?: string;
+    stove_lv_content?: string | number;
     avatar_image?: string;
     total_recharge_amount?: number;
   };
@@ -37,6 +37,19 @@ function normalizePlayerId(value: FormDataEntryValue | string | null) {
   return String(value ?? "")
     .replace(/\D/g, "")
     .trim();
+}
+
+function normalizeImageUrl(value: string | number | null | undefined) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
 }
 
 function signParams(params: Record<string, string>) {
@@ -101,8 +114,8 @@ function mapLoginDataToProfile(
     nickname: cleanNickname(profile.nickname),
     kid: profile.kid ?? null,
     stoveLv: profile.stove_lv ?? null,
-    stoveLvContent: profile.stove_lv_content ?? null,
-    avatarImage: profile.avatar_image ?? null,
+    stoveLvContent: normalizeImageUrl(profile.stove_lv_content),
+    avatarImage: normalizeImageUrl(profile.avatar_image),
     totalRechargeAmount: profile.total_recharge_amount ?? null,
   } satisfies GameAccountProfile;
 }
