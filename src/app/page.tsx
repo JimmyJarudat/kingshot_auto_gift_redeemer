@@ -13,6 +13,25 @@ const avatars = [
   "/avatars/player-crown.svg",
 ];
 
+const redemptionLabels: Record<string, string> = {
+  success: "Delivered",
+  already_redeemed: "Already Claimed",
+  pending: "Waiting",
+  processing: "Sending",
+  failed: "Failed",
+  expired: "Expired",
+};
+
+const redemptionStyles: Record<string, string> = {
+  success: "border-[#9eb66d] bg-[#f1f7e8] text-[#4d642d]",
+  already_redeemed: "border-[#caa35a] bg-[#fff8df] text-[#7b5d1e]",
+  pending: "border-[#d8ddcf] bg-[#f7f8f3] text-[#68715a]",
+  processing: "border-[#9db7c7] bg-[#eef7fb] text-[#315c73]",
+  failed: "border-[#e3c8bd] bg-[#fff5f0] text-[#8c3f25]",
+  expired: "border-[#d0c7bd] bg-[#f7f2ed] text-[#725d4a]",
+  not_sent: "border-[#d8ddcf] bg-white text-[#68715a]",
+};
+
 function getSafeImageUrl(value: string | null) {
   if (!value) {
     return null;
@@ -24,17 +43,6 @@ function getSafeImageUrl(value: string | null) {
   } catch {
     return null;
   }
-}
-
-function formatDate(value: Date | null) {
-  if (!value) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(value);
 }
 
 export default async function Home() {
@@ -61,20 +69,32 @@ export default async function Home() {
         first_seen_at: "desc",
       },
       select: {
+        id: true,
         code: true,
         status: true,
         reward_description: true,
-        expires_at: true,
+        gift_code_redemptions: {
+          select: {
+            game_account_id: true,
+            status: true,
+          },
+        },
       },
     }),
   ]);
+
+  const latestRedemptionsByAccount = new Map(
+    latestGiftCode?.gift_code_redemptions.map((redemption) => [
+      redemption.game_account_id,
+      redemption.status,
+    ]) ?? [],
+  );
 
   const featuredGiftCode = latestGiftCode
     ? {
         code: latestGiftCode.code,
         status: latestGiftCode.status,
         reward: latestGiftCode.reward_description,
-        expiresAt: formatDate(latestGiftCode.expires_at),
       }
     : null;
 
@@ -97,6 +117,8 @@ export default async function Home() {
     stoveLevel: account.stove_lv,
     stoveLvContent: getSafeImageUrl(account.stove_lv_content),
     recharge: account.total_recharge_amount,
+    latestGiftStatus:
+      latestRedemptionsByAccount.get(account.id)?.toLowerCase() ?? "not_sent",
   }));
 
   return (
@@ -163,16 +185,29 @@ export default async function Home() {
                   </p>
                 ) : null}
               </div>
-              <div className="relative text-sm sm:min-w-48">
-                <div className="rounded-md border border-[#e4c87a] bg-white/70 px-3 py-2">
-                  <span className="block text-xs uppercase text-[#7b5d1e]">
-                    Expires
-                  </span>
-                  <span className="text-[#171a12]">
-                    {featuredGiftCode.expiresAt}
-                  </span>
-                </div>
-              </div>
+              <button
+                type="button"
+                className="relative inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-[#b98a32] bg-[#171a12] px-5 text-sm font-semibold text-[#fff8df] shadow-md transition hover:bg-[#2b2f22] focus:outline-none focus:ring-2 focus:ring-[#caa35a] focus:ring-offset-2 sm:w-auto"
+                aria-label="Send latest gift code to all players"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                >
+                  <path d="M20 12v10H4V12" />
+                  <path d="M2 7h20v5H2z" />
+                  <path d="M12 22V7" />
+                  <path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z" />
+                  <path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z" />
+                </svg>
+                Send Gift
+              </button>
             </div>
           ) : (
             <div className="px-5 py-5">
@@ -190,11 +225,12 @@ export default async function Home() {
         </section>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/95 shadow-sm backdrop-blur-[1px]">
-          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]">
+          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[88px_1.15fr_0.95fr_110px_150px_120px_88px]">
             <span>Avatar</span>
             <span>In-game name</span>
             <span className="hidden sm:block">User ID</span>
             <span className="hidden sm:block">Stove Level</span>
+            <span className="hidden sm:block">Latest Gift</span>
             <span className="hidden sm:block">Status</span>
             <span className="hidden sm:block">Action</span>
           </div>
@@ -203,7 +239,7 @@ export default async function Home() {
             <div className="divide-y divide-[#edf0e8]">
               {players.map((player) => (
               <article
-                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]"
+                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[88px_1.15fr_0.95fr_110px_150px_120px_88px]"
                 key={player.id}
               >
                 <Image
@@ -224,6 +260,13 @@ export default async function Home() {
                   <p className="mt-2 break-all font-mono text-xs text-[#4d5740] sm:hidden">
                     {player.id}
                   </p>
+                  <div className="mt-3 sm:hidden">
+                    <span
+                      className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
+                    >
+                      {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
+                    </span>
+                  </div>
                 </div>
                 <p className="hidden break-all font-mono text-sm text-[#384030] sm:block">
                   {player.id}
@@ -239,6 +282,13 @@ export default async function Home() {
                       className="h-6 w-6 object-contain"
                     />
                   ) : null}
+                </div>
+                <div className="hidden sm:block">
+                  <span
+                    className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
+                  >
+                    {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
+                  </span>
                 </div>
                 <div className="hidden items-center gap-3 sm:flex">
                   <StatusToggle
