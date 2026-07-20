@@ -56,17 +56,16 @@ export default async function Home() {
   }));
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f7f8f3] text-[#161814]">
-      <div
+    <main className="relative min-h-screen overflow-hidden bg-[#10130f] text-[#161814]">
+      <img
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
-        style={{
-          backgroundImage: "url('https://kingshot.gg/images/bg_hero.jpg')",
-        }}
+        src="/images.jpg"
+        alt=""
+        className="pointer-events-none fixed inset-0 h-full w-full object-cover opacity-55"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[#f7f8f3]/80"
+        className="pointer-events-none fixed inset-0 bg-white/30"
       />
       <section className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
         <header className="flex items-center justify-between gap-4 border-b border-[#d9ddcf] pb-6">
@@ -88,7 +87,7 @@ export default async function Home() {
           <AddPlayerModal />
         </header>
 
-        <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white shadow-sm">
+        <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/95 shadow-sm backdrop-blur-[1px]">
           <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]">
             <span>Avatar</span>
             <span>In-game name</span>
