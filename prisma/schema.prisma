@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model game_accounts {
+  id                    String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  player_id             String                  @unique(map: "game_accounts_player_id_unique") @db.VarChar(100)
+  nickname              String?                 @db.VarChar(100)
+  server_id             String?                 @db.VarChar(100)
+  redeem_token          String?
+  is_active             Boolean                 @default(true)
+  last_redeemed_at      DateTime?               @db.Timestamptz(6)
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  gift_code_redemptions gift_code_redemptions[]
+
+  @@index([is_active], map: "idx_game_accounts_active")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model gift_code_redemptions {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  gift_code_id     String        @db.Uuid
+  game_account_id  String        @db.Uuid
+  status           String        @default("pending") @db.VarChar(30)
+  attempt_count    Int           @default(0)
+  response_message String?
+  response_data    Json?
+  queued_at        DateTime      @default(now()) @db.Timestamptz(6)
+  processed_at     DateTime?     @db.Timestamptz(6)
+  created_at       DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime      @default(now()) @db.Timestamptz(6)
+  game_accounts    game_accounts @relation(fields: [game_account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  gift_codes       gift_codes    @relation(fields: [gift_code_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([gift_code_id, game_account_id], map: "gift_code_redemptions_unique")
+  @@index([game_account_id], map: "idx_redemptions_account")
+  @@index([gift_code_id], map: "idx_redemptions_code")
+  @@index([status], map: "idx_redemptions_status")
+}
+
+model gift_code_sources {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String       @db.VarChar(100)
+  url             String       @unique(map: "gift_code_sources_url_unique")
+  is_active       Boolean      @default(true)
+  last_fetched_at DateTime?    @db.Timestamptz(6)
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime     @default(now()) @db.Timestamptz(6)
+  gift_codes      gift_codes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model gift_codes {
+  id                    String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                  String                  @unique(map: "gift_codes_code_unique") @db.VarChar(100)
+  source_id             String?                 @db.Uuid
+  status                String                  @default("unknown") @db.VarChar(20)
+  reward_description    String?
+  published_at          DateTime?               @db.Timestamptz(6)
+  expires_at            DateTime?               @db.Timestamptz(6)
+  first_seen_at         DateTime                @default(now()) @db.Timestamptz(6)
+  last_seen_at          DateTime                @default(now()) @db.Timestamptz(6)
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  gift_code_redemptions gift_code_redemptions[]
+  gift_code_sources     gift_code_sources?      @relation(fields: [source_id], references: [id], onUpdate: NoAction)
+
+  @@index([status], map: "idx_gift_codes_status")
+}

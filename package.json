@@ -6,10 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "test": "bun test",
+    "test:unit": "bun test tests/unit",
+    "test:integration": "bun test tests/integration",
+    "test:uat": "node scripts/test/run-uat.mjs",
+    "seed:dev": "bun --env-file=.env prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "crypto-js": "^4.2.0",
     "next": "16.2.10",
+    "pg": "^8.22.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -18,8 +30,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/crypto-js": "^4.2.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
