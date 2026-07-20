@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AddPlayerModal } from "@/app/add-player-modal";
+import { CopyButton } from "@/app/copy-button";
 import { StatusToggle } from "@/app/status-toggle";
 import { RowActions } from "@/app/sync-button";
 import { prisma } from "@/lib/prisma";
@@ -37,7 +38,7 @@ function formatDate(value: Date | null) {
 }
 
 export default async function Home() {
-  const [accounts, latestGiftCodes] = await Promise.all([
+  const [accounts, latestGiftCode] = await Promise.all([
     prisma.game_accounts.findMany({
       orderBy: {
         created_at: "desc",
@@ -55,28 +56,27 @@ export default async function Home() {
         total_recharge_amount: true,
       },
     }),
-    prisma.gift_codes.findMany({
+    prisma.gift_codes.findFirst({
       orderBy: {
         first_seen_at: "desc",
       },
-      take: 6,
       select: {
         code: true,
         status: true,
         reward_description: true,
         expires_at: true,
-        first_seen_at: true,
       },
     }),
   ]);
 
-  const giftCodes = latestGiftCodes.map((giftCode) => ({
-    code: giftCode.code,
-    status: giftCode.status,
-    reward: giftCode.reward_description || "Reward details pending",
-    firstSeen: formatDate(giftCode.first_seen_at),
-    expiresAt: formatDate(giftCode.expires_at),
-  }));
+  const featuredGiftCode = latestGiftCode
+    ? {
+        code: latestGiftCode.code,
+        status: latestGiftCode.status,
+        reward: latestGiftCode.reward_description,
+        expiresAt: formatDate(latestGiftCode.expires_at),
+      }
+    : null;
 
   const statusStyles: Record<string, string> = {
     active: "border-[#9eb66d] bg-[#f1f7e8] text-[#4d642d]",
@@ -130,6 +130,64 @@ export default async function Home() {
           </div>
           <AddPlayerModal />
         </header>
+
+        <section className="overflow-hidden rounded-lg border border-[#caa35a] bg-[#fff8df]/95 shadow-lg shadow-black/10 backdrop-blur-[1px]">
+          {featuredGiftCode ? (
+            <div className="relative grid gap-5 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,#d5a94855,transparent_60%)]"
+              />
+              <div className="relative min-w-0">
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
+                    Latest Gift Code
+                  </p>
+                  <span
+                    className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold uppercase ${getGiftStatusClass(
+                      featuredGiftCode.status,
+                    )}`}
+                  >
+                    {featuredGiftCode.status}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <p className="min-w-0 break-all font-mono text-3xl font-semibold text-[#171a12] sm:text-4xl">
+                    {featuredGiftCode.code}
+                  </p>
+                  <CopyButton value={featuredGiftCode.code} />
+                </div>
+                {featuredGiftCode.reward ? (
+                  <p className="mt-2 text-sm text-[#665633]">
+                    {featuredGiftCode.reward}
+                  </p>
+                ) : null}
+              </div>
+              <div className="relative text-sm sm:min-w-48">
+                <div className="rounded-md border border-[#e4c87a] bg-white/70 px-3 py-2">
+                  <span className="block text-xs uppercase text-[#7b5d1e]">
+                    Expires
+                  </span>
+                  <span className="text-[#171a12]">
+                    {featuredGiftCode.expiresAt}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="px-5 py-5">
+              <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
+                Latest Gift Code
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[#171a12]">
+                No gift codes yet
+              </p>
+              <p className="mt-1 text-sm text-[#665633]">
+                New codes collected by the automation will be featured here.
+              </p>
+            </div>
+          )}
+        </section>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/95 shadow-sm backdrop-blur-[1px]">
           <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]">
@@ -209,66 +267,6 @@ export default async function Home() {
           )}
         </div>
 
-        <section className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/95 shadow-sm backdrop-blur-[1px]">
-          <div className="flex items-center justify-between gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3">
-            <h2 className="text-lg font-semibold text-[#171a12]">
-              Latest Gift Codes
-            </h2>
-            <span className="text-xs font-semibold uppercase text-[#667055]">
-              Latest {giftCodes.length}
-            </span>
-          </div>
-
-          {giftCodes.length > 0 ? (
-            <div className="divide-y divide-[#edf0e8]">
-              {giftCodes.map((giftCode) => (
-                <article
-                  key={giftCode.code}
-                  className="grid gap-3 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[1fr_120px_180px_180px]"
-                >
-                  <div className="min-w-0">
-                    <p className="break-all font-mono text-lg font-semibold text-[#171a12]">
-                      {giftCode.code}
-                    </p>
-                    <p className="mt-1 text-sm text-[#68715a]">
-                      {giftCode.reward}
-                    </p>
-                  </div>
-                  <div>
-                    <span
-                      className={`inline-flex rounded-md border px-3 py-1 text-sm font-medium ${getGiftStatusClass(
-                        giftCode.status,
-                      )}`}
-                    >
-                      {giftCode.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-[#384030]">
-                    <span className="block text-xs uppercase text-[#68715a]">
-                      First seen
-                    </span>
-                    {giftCode.firstSeen}
-                  </p>
-                  <p className="text-sm text-[#384030]">
-                    <span className="block text-xs uppercase text-[#68715a]">
-                      Expires
-                    </span>
-                    {giftCode.expiresAt}
-                  </p>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="px-4 py-10 text-center">
-              <p className="text-lg font-semibold text-[#171a12]">
-                No gift codes yet
-              </p>
-              <p className="mt-2 text-sm text-[#68715a]">
-                New codes collected by the automation will appear here.
-              </p>
-            </div>
-          )}
-        </section>
       </section>
     </main>
   );
