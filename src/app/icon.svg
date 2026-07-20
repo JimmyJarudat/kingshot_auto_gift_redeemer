@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="48" y1="24" x2="208" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34301f" />
+      <stop offset="0.52" stop-color="#11130f" />
+      <stop offset="1" stop-color="#050604" />
+    </linearGradient>
+    <linearGradient id="gold" x1="68" y1="36" x2="188" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff0a8" />
+      <stop offset="0.42" stop-color="#d8a846" />
+      <stop offset="1" stop-color="#8d5d18" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#090b08" />
+  <path
+    d="M128 20 214 55v64c0 55-33 93-86 118-53-25-86-63-86-118V55l86-35Z"
+    fill="url(#bg)"
+    stroke="url(#gold)"
+    stroke-width="12"
+    stroke-linejoin="round"
+    filter="url(#shadow)"
+  />
+  <path
+    d="M128 39 195 67v51c0 43-25 73-67 94-42-21-67-51-67-94V67l67-28Z"
+    fill="none"
+    stroke="#f0cf78"
+    stroke-opacity="0.38"
+    stroke-width="4"
+    stroke-linejoin="round"
+  />
+  <text
+    x="128"
+    y="150"
+    text-anchor="middle"
+    font-family="Arial Black, Impact, sans-serif"
+    font-size="70"
+    font-weight="900"
+    letter-spacing="-5"
+    fill="#fff3c2"
+  >KON</text>
+  <path d="M62 180h132" stroke="url(#gold)" stroke-width="9" stroke-linecap="round" />
+  <path d="M128 50 135 66 152 73 135 80 128 96 121 80 104 73 121 66 128 50Z" fill="#ffe9a0" />
+</svg>

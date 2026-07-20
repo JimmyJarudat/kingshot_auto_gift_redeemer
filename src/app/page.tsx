@@ -165,8 +165,11 @@ export default async function Home() {
             />
             <div className="hidden min-w-0 sm:block">
               <h1 className="truncate text-2xl font-semibold text-[#171a12]">
-                Kingshot Auto Gift Redeemer
+                KON Gift Redeemer
               </h1>
+              <p className="mt-1 inline-flex max-w-full truncate rounded bg-[#171a12]/90 px-2 py-1 text-xs font-semibold uppercase text-[#fff8df] shadow-sm ring-1 ring-[#caa35a]/60">
+                KILLERSofNIGHT Alliance
+              </p>
             </div>
           </div>
           <AddPlayerModal />
