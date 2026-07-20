@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { AddPlayerModal } from "@/app/add-player-modal";
 import { CopyButton } from "@/app/copy-button";
+import { RefreshGiftCodesButton } from "@/app/refresh-gift-codes-button";
 import { StatusToggle } from "@/app/status-toggle";
 import { RowActions } from "@/app/sync-button";
 import { prisma } from "@/lib/prisma";
@@ -16,7 +17,7 @@ const avatars = [
 const redemptionLabels: Record<string, string> = {
   success: "Delivered",
   already_redeemed: "Already Claimed",
-  pending: "Waiting",
+  pending: "Queued",
   processing: "Sending",
   failed: "Failed",
   expired: "Expired",
@@ -43,6 +44,19 @@ function getSafeImageUrl(value: string | null) {
   } catch {
     return null;
   }
+}
+
+function normalizeRedemptionStatus(status: string, responseMessage: string | null) {
+  const message = responseMessage?.trim().toUpperCase();
+
+  if (
+    status.toLowerCase() === "failed" &&
+    (message === "RECEIVED." || message === "RECEIVED")
+  ) {
+    return "already_redeemed";
+  }
+
+  return status.toLowerCase();
 }
 
 export default async function Home() {
@@ -77,6 +91,7 @@ export default async function Home() {
           select: {
             game_account_id: true,
             status: true,
+            response_message: true,
           },
         },
       },
@@ -86,7 +101,10 @@ export default async function Home() {
   const latestRedemptionsByAccount = new Map(
     latestGiftCode?.gift_code_redemptions.map((redemption) => [
       redemption.game_account_id,
-      redemption.status,
+      normalizeRedemptionStatus(
+        redemption.status,
+        redemption.response_message,
+      ),
     ]) ?? [],
   );
 
@@ -161,17 +179,20 @@ export default async function Home() {
                 className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,#d5a94855,transparent_60%)]"
               />
               <div className="relative min-w-0">
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
-                    Latest Gift Code
-                  </p>
-                  <span
-                    className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold uppercase ${getGiftStatusClass(
-                      featuredGiftCode.status,
-                    )}`}
-                  >
-                    {featuredGiftCode.status}
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
+                      Latest Gift Code
+                    </p>
+                    <span
+                      className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold uppercase ${getGiftStatusClass(
+                        featuredGiftCode.status,
+                      )}`}
+                    >
+                      {featuredGiftCode.status}
+                    </span>
+                  </div>
+                  <RefreshGiftCodesButton />
                 </div>
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <p className="min-w-0 break-all font-mono text-3xl font-semibold text-[#171a12] sm:text-4xl">
@@ -211,9 +232,12 @@ export default async function Home() {
             </div>
           ) : (
             <div className="px-5 py-5">
-              <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
-                Latest Gift Code
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase text-[#7b5d1e]">
+                  Latest Gift Code
+                </p>
+                <RefreshGiftCodesButton />
+              </div>
               <p className="mt-2 text-2xl font-semibold text-[#171a12]">
                 No gift codes yet
               </p>

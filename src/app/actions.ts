@@ -151,9 +151,14 @@ async function redeemGiftCode(playerId: string, giftCode: string) {
 function mapRedeemStatus(payload: GiftCodeResponse) {
   const code = Number(payload.code ?? -1);
   const errCode = Number(payload.err_code ?? payload.data?.err_code ?? -1);
+  const message = payload.msg?.trim().toUpperCase();
 
   if (code === 0 && errCode === 20000) {
     return "success";
+  }
+
+  if (message === "RECEIVED." || message === "RECEIVED") {
+    return "already_redeemed";
   }
 
   if ([40001, 40003, 40007].includes(errCode)) {
@@ -299,6 +304,19 @@ export async function deleteGameAccount(playerIdInput: string) {
   revalidatePath("/");
 }
 
+export async function refreshGiftCodes() {
+  const response = await fetch("https://n8n.jarudat.com/webhook/refresh-gift-code", {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Gift code refresh request failed");
+  }
+
+  revalidatePath("/");
+}
+
 export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
   const playerId = normalizePlayerId(playerIdInput);
 
@@ -344,37 +362,73 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
     throw new Error("Latest gift code is disabled");
   }
 
-  const redemption = await prisma.gift_code_redemptions.upsert({
+  const existingRedemption = await prisma.gift_code_redemptions.findUnique({
     where: {
       gift_code_id_game_account_id: {
         gift_code_id: latestGiftCode.id,
         game_account_id: account.id,
       },
     },
-    create: {
-      gift_code_id: latestGiftCode.id,
-      game_account_id: account.id,
-      status: "processing",
-      attempt_count: 1,
-      updated_at: new Date(),
-    },
-    update: {
-      status: "processing",
-      attempt_count: {
-        increment: 1,
-      },
-      updated_at: new Date(),
-    },
     select: {
       id: true,
+      status: true,
     },
   });
+
+  if (
+    existingRedemption?.status === "success" ||
+    existingRedemption?.status === "already_redeemed"
+  ) {
+    revalidatePath("/");
+    return {
+      status: existingRedemption.status,
+    };
+  }
+
+  if (existingRedemption?.status === "processing") {
+    throw new Error("This gift is already being sent");
+  }
+
+  const now = new Date();
+  const redemption = existingRedemption
+    ? await prisma.gift_code_redemptions.update({
+        where: {
+          id: existingRedemption.id,
+        },
+        data: {
+          status: "processing",
+          attempt_count: {
+            increment: 1,
+          },
+          response_message: null,
+          response_data: undefined,
+          processed_at: null,
+          queued_at: now,
+          updated_at: now,
+        },
+        select: {
+          id: true,
+        },
+      })
+    : await prisma.gift_code_redemptions.create({
+        data: {
+          gift_code_id: latestGiftCode.id,
+          game_account_id: account.id,
+          status: "processing",
+          attempt_count: 1,
+          queued_at: now,
+          updated_at: now,
+        },
+        select: {
+          id: true,
+        },
+      });
 
   try {
     await fetchGameProfile(playerId);
     const payload = await redeemGiftCode(playerId, latestGiftCode.code);
     const status = mapRedeemStatus(payload);
-    const now = new Date();
+    const processedAt = new Date();
 
     await prisma.gift_code_redemptions.update({
       where: {
@@ -384,8 +438,8 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
         status,
         response_message: payload.msg ?? "Gift delivery completed",
         response_data: payload,
-        processed_at: now,
-        updated_at: now,
+        processed_at: processedAt,
+        updated_at: processedAt,
       },
     });
 
@@ -395,14 +449,20 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
           player_id: playerId,
         },
         data: {
-          last_redeemed_at: now,
-          updated_at: now,
+          last_redeemed_at: processedAt,
+          updated_at: processedAt,
         },
       });
     }
+
+    revalidatePath("/");
+    return {
+      status,
+    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Gift delivery failed";
+    const processedAt = new Date();
 
     await prisma.gift_code_redemptions.update({
       where: {
@@ -414,13 +474,12 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
         response_data: {
           message,
         },
-        processed_at: new Date(),
-        updated_at: new Date(),
+        processed_at: processedAt,
+        updated_at: processedAt,
       },
     });
 
-    throw error;
-  } finally {
     revalidatePath("/");
+    throw error;
   }
 }
