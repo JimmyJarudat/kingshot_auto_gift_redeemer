@@ -150,3 +150,23 @@ export async function importGameAccount(profile: GameAccountProfile) {
 
   revalidatePath("/");
 }
+
+export async function updateGameAccountStatus(playerIdInput: string, isActive: boolean) {
+  const playerId = normalizePlayerId(playerIdInput);
+
+  if (!playerId) {
+    throw new Error("Player ID is required");
+  }
+
+  await prisma.game_accounts.update({
+    where: {
+      player_id: playerId,
+    },
+    data: {
+      is_active: isActive,
+      updated_at: new Date(),
+    },
+  });
+
+  revalidatePath("/");
+}

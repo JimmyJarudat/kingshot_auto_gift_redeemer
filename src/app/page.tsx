@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AddPlayerModal } from "@/app/add-player-modal";
+import { StatusToggle } from "@/app/status-toggle";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -46,14 +47,14 @@ export default async function Home() {
     id: account.player_id,
     name: account.nickname?.trim() || "ไม่ระบุชื่อ",
     server: account.server_id?.trim() || (account.kid ? String(account.kid) : "-"),
-    status: account.is_active ? "Active" : "Inactive",
+    isActive: account.is_active,
     avatar: account.avatar_image?.trim() || avatars[index % avatars.length],
     stoveLevel: account.stove_lv,
     stoveLvContent: getSafeImageUrl(account.stove_lv_content),
     recharge: account.total_recharge_amount,
   }));
 
-  const activeCount = players.filter((player) => player.status === "Active").length;
+  const activeCount = players.filter((player) => player.isActive).length;
   const serverCount = new Set(
     players
       .map((player) => player.server)
@@ -147,9 +148,13 @@ export default async function Home() {
                     />
                   ) : null}
                 </div>
-                <div className="hidden sm:block">
-                  <span className="inline-flex rounded-md border border-[#cfd8bc] bg-[#f1f5e9] px-3 py-1 text-sm font-medium text-[#455431]">
-                    {player.status}
+                <div className="hidden items-center gap-3 sm:flex">
+                  <StatusToggle
+                    playerId={player.id}
+                    isActive={player.isActive}
+                  />
+                  <span className="text-sm font-medium text-[#455431]">
+                    {player.isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
               </article>
