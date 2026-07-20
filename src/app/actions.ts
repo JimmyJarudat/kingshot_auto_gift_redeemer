@@ -9,7 +9,8 @@ export type GameAccountProfile = {
   nickname: string | null;
   kid: number | null;
   stoveLv: number | null;
-  stoveLvContent: number | null;
+  stoveLvContent: string | null;
+  goldCityLevel: number | null;
   avatarImage: string | null;
   totalRechargeAmount: number | null;
 };
@@ -21,7 +22,7 @@ type LoginResponse = {
     nickname?: string;
     kid?: number;
     stove_lv?: number;
-    stove_lv_content?: number;
+    stove_lv_content?: string;
     avatar_image?: string;
     total_recharge_amount?: number;
   };
@@ -37,6 +38,14 @@ function normalizePlayerId(value: FormDataEntryValue | string | null) {
   return String(value ?? "")
     .replace(/\D/g, "")
     .trim();
+}
+
+function getGoldCityLevel(stoveLv: number | null | undefined) {
+  if (!stoveLv || stoveLv <= 30) {
+    return null;
+  }
+
+  return Math.floor((stoveLv - 31) / 5) + 1;
 }
 
 function signParams(params: Record<string, string>) {
@@ -107,6 +116,7 @@ export async function searchGameAccount(playerIdInput: string) {
     kid: profile.kid ?? null,
     stoveLv: profile.stove_lv ?? null,
     stoveLvContent: profile.stove_lv_content ?? null,
+    goldCityLevel: getGoldCityLevel(profile.stove_lv),
     avatarImage: profile.avatar_image ?? null,
     totalRechargeAmount: profile.total_recharge_amount ?? null,
   } satisfies GameAccountProfile;

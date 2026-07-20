@@ -29,14 +29,12 @@ export type AggregateGame_accounts = {
 export type Game_accountsAvgAggregateOutputType = {
   kid: number | null
   stove_lv: number | null
-  stove_lv_content: number | null
   total_recharge_amount: number | null
 }
 
 export type Game_accountsSumAggregateOutputType = {
   kid: number | null
   stove_lv: number | null
-  stove_lv_content: number | null
   total_recharge_amount: number | null
 }
 
@@ -47,7 +45,7 @@ export type Game_accountsMinAggregateOutputType = {
   server_id: string | null
   kid: number | null
   stove_lv: number | null
-  stove_lv_content: number | null
+  stove_lv_content: string | null
   avatar_image: string | null
   total_recharge_amount: number | null
   redeem_token: string | null
@@ -64,7 +62,7 @@ export type Game_accountsMaxAggregateOutputType = {
   server_id: string | null
   kid: number | null
   stove_lv: number | null
-  stove_lv_content: number | null
+  stove_lv_content: string | null
   avatar_image: string | null
   total_recharge_amount: number | null
   redeem_token: string | null
@@ -96,14 +94,12 @@ export type Game_accountsCountAggregateOutputType = {
 export type Game_accountsAvgAggregateInputType = {
   kid?: true
   stove_lv?: true
-  stove_lv_content?: true
   total_recharge_amount?: true
 }
 
 export type Game_accountsSumAggregateInputType = {
   kid?: true
   stove_lv?: true
-  stove_lv_content?: true
   total_recharge_amount?: true
 }
 
@@ -252,7 +248,7 @@ export type Game_accountsGroupByOutputType = {
   server_id: string | null
   kid: number | null
   stove_lv: number | null
-  stove_lv_content: number | null
+  stove_lv_content: string | null
   avatar_image: string | null
   total_recharge_amount: number | null
   redeem_token: string | null
@@ -292,7 +288,7 @@ export type game_accountsWhereInput = {
   server_id?: Prisma.StringNullableFilter<"game_accounts"> | string | null
   kid?: Prisma.IntNullableFilter<"game_accounts"> | number | null
   stove_lv?: Prisma.IntNullableFilter<"game_accounts"> | number | null
-  stove_lv_content?: Prisma.IntNullableFilter<"game_accounts"> | number | null
+  stove_lv_content?: Prisma.StringNullableFilter<"game_accounts"> | string | null
   avatar_image?: Prisma.StringNullableFilter<"game_accounts"> | string | null
   total_recharge_amount?: Prisma.IntNullableFilter<"game_accounts"> | number | null
   redeem_token?: Prisma.StringNullableFilter<"game_accounts"> | string | null
@@ -331,7 +327,7 @@ export type game_accountsWhereUniqueInput = Prisma.AtLeast<{
   server_id?: Prisma.StringNullableFilter<"game_accounts"> | string | null
   kid?: Prisma.IntNullableFilter<"game_accounts"> | number | null
   stove_lv?: Prisma.IntNullableFilter<"game_accounts"> | number | null
-  stove_lv_content?: Prisma.IntNullableFilter<"game_accounts"> | number | null
+  stove_lv_content?: Prisma.StringNullableFilter<"game_accounts"> | string | null
   avatar_image?: Prisma.StringNullableFilter<"game_accounts"> | string | null
   total_recharge_amount?: Prisma.IntNullableFilter<"game_accounts"> | number | null
   redeem_token?: Prisma.StringNullableFilter<"game_accounts"> | string | null
@@ -374,7 +370,7 @@ export type game_accountsScalarWhereWithAggregatesInput = {
   server_id?: Prisma.StringNullableWithAggregatesFilter<"game_accounts"> | string | null
   kid?: Prisma.IntNullableWithAggregatesFilter<"game_accounts"> | number | null
   stove_lv?: Prisma.IntNullableWithAggregatesFilter<"game_accounts"> | number | null
-  stove_lv_content?: Prisma.IntNullableWithAggregatesFilter<"game_accounts"> | number | null
+  stove_lv_content?: Prisma.StringNullableWithAggregatesFilter<"game_accounts"> | string | null
   avatar_image?: Prisma.StringNullableWithAggregatesFilter<"game_accounts"> | string | null
   total_recharge_amount?: Prisma.IntNullableWithAggregatesFilter<"game_accounts"> | number | null
   redeem_token?: Prisma.StringNullableWithAggregatesFilter<"game_accounts"> | string | null
@@ -391,7 +387,7 @@ export type game_accountsCreateInput = {
   server_id?: string | null
   kid?: number | null
   stove_lv?: number | null
-  stove_lv_content?: number | null
+  stove_lv_content?: string | null
   avatar_image?: string | null
   total_recharge_amount?: number | null
   redeem_token?: string | null
@@ -409,7 +405,7 @@ export type game_accountsUncheckedCreateInput = {
   server_id?: string | null
   kid?: number | null
   stove_lv?: number | null
-  stove_lv_content?: number | null
+  stove_lv_content?: string | null
   avatar_image?: string | null
   total_recharge_amount?: number | null
   redeem_token?: string | null
@@ -427,7 +423,7 @@ export type game_accountsUpdateInput = {
   server_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stove_lv?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stove_lv_content?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  stove_lv_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar_image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   total_recharge_amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   redeem_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -445,7 +441,7 @@ export type game_accountsUncheckedUpdateInput = {
   server_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stove_lv?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stove_lv_content?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  stove_lv_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar_image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   total_recharge_amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   redeem_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -463,7 +459,7 @@ export type game_accountsCreateManyInput = {
   server_id?: string | null
   kid?: number | null
   stove_lv?: number | null
-  stove_lv_content?: number | null
+  stove_lv_content?: string | null
   avatar_image?: string | null
   total_recharge_amount?: number | null
   redeem_token?: string | null
@@ -480,7 +476,7 @@ export type game_accountsUpdateManyMutationInput = {
   server_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stove_lv?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stove_lv_content?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  stove_lv_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar_image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   total_recharge_amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   redeem_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -497,7 +493,7 @@ export type game_accountsUncheckedUpdateManyInput = {
   server_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stove_lv?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stove_lv_content?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  stove_lv_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar_image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   total_recharge_amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   redeem_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -527,7 +523,6 @@ export type game_accountsCountOrderByAggregateInput = {
 export type game_accountsAvgOrderByAggregateInput = {
   kid?: Prisma.SortOrder
   stove_lv?: Prisma.SortOrder
-  stove_lv_content?: Prisma.SortOrder
   total_recharge_amount?: Prisma.SortOrder
 }
 
@@ -568,7 +563,6 @@ export type game_accountsMinOrderByAggregateInput = {
 export type game_accountsSumOrderByAggregateInput = {
   kid?: Prisma.SortOrder
   stove_lv?: Prisma.SortOrder
-  stove_lv_content?: Prisma.SortOrder
   total_recharge_amount?: Prisma.SortOrder
 }
 
@@ -626,7 +620,7 @@ export type game_accountsCreateWithoutGift_code_redemptionsInput = {
   server_id?: string | null
   kid?: number | null
   stove_lv?: number | null
-  stove_lv_content?: number | null
+  stove_lv_content?: string | null
   avatar_image?: string | null
   total_recharge_amount?: number | null
   redeem_token?: string | null
@@ -643,7 +637,7 @@ export type game_accountsUncheckedCreateWithoutGift_code_redemptionsInput = {
   server_id?: string | null
   kid?: number | null
   stove_lv?: number | null
-  stove_lv_content?: number | null
+  stove_lv_content?: string | null
   avatar_image?: string | null
   total_recharge_amount?: number | null
   redeem_token?: string | null
@@ -676,7 +670,7 @@ export type game_accountsUpdateWithoutGift_code_redemptionsInput = {
   server_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stove_lv?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stove_lv_content?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  stove_lv_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar_image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   total_recharge_amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   redeem_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -693,7 +687,7 @@ export type game_accountsUncheckedUpdateWithoutGift_code_redemptionsInput = {
   server_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   stove_lv?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stove_lv_content?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  stove_lv_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar_image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   total_recharge_amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   redeem_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -824,7 +818,7 @@ export type $game_accountsPayload<ExtArgs extends runtime.Types.Extensions.Inter
     server_id: string | null
     kid: number | null
     stove_lv: number | null
-    stove_lv_content: number | null
+    stove_lv_content: string | null
     avatar_image: string | null
     total_recharge_amount: number | null
     redeem_token: string | null
@@ -1262,7 +1256,7 @@ export interface game_accountsFieldRefs {
   readonly server_id: Prisma.FieldRef<"game_accounts", 'String'>
   readonly kid: Prisma.FieldRef<"game_accounts", 'Int'>
   readonly stove_lv: Prisma.FieldRef<"game_accounts", 'Int'>
-  readonly stove_lv_content: Prisma.FieldRef<"game_accounts", 'Int'>
+  readonly stove_lv_content: Prisma.FieldRef<"game_accounts", 'String'>
   readonly avatar_image: Prisma.FieldRef<"game_accounts", 'String'>
   readonly total_recharge_amount: Prisma.FieldRef<"game_accounts", 'Int'>
   readonly redeem_token: Prisma.FieldRef<"game_accounts", 'String'>

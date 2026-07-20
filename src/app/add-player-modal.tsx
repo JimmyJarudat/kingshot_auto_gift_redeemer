@@ -168,7 +168,12 @@ export function AddPlayerModal() {
                       <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-[#384030]">
                         <span>Server {profile.kid ?? "-"}</span>
                         <span>Stove Lv. {profile.stoveLv ?? "-"}</span>
-                        <span>Content {profile.stoveLvContent ?? "-"}</span>
+                        <span>
+                          เมือง{" "}
+                          {profile.goldCityLevel
+                            ? `ทอง ${profile.goldCityLevel}`
+                            : "-"}
+                        </span>
                         <span>Recharge {profile.totalRechargeAmount ?? 0}</span>
                       </div>
                     </div>

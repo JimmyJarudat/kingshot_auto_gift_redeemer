@@ -14,7 +14,7 @@ model game_accounts {
   server_id             String?                 @db.VarChar(100)
   kid                   Int?
   stove_lv              Int?
-  stove_lv_content      Int?
+  stove_lv_content      String?
   avatar_image          String?
   total_recharge_amount Int?
   redeem_token          String?

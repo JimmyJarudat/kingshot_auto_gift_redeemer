@@ -10,6 +10,14 @@ const avatars = [
   "/avatars/player-crown.svg",
 ];
 
+function getGoldCityLevel(stoveLevel: number | null) {
+  if (!stoveLevel || stoveLevel <= 30) {
+    return null;
+  }
+
+  return Math.floor((stoveLevel - 31) / 5) + 1;
+}
+
 export default async function Home() {
   const accounts = await prisma.game_accounts.findMany({
     orderBy: {
@@ -36,6 +44,7 @@ export default async function Home() {
     status: account.is_active ? "Active" : "Inactive",
     avatar: account.avatar_image?.trim() || avatars[index % avatars.length],
     stoveLevel: account.stove_lv,
+    goldCityLevel: getGoldCityLevel(account.stove_lv),
     recharge: account.total_recharge_amount,
   }));
 
@@ -122,7 +131,13 @@ export default async function Home() {
                   {player.id}
                 </p>
                 <p className="hidden text-sm font-medium text-[#384030] sm:block">
-                  {player.stoveLevel ? `Lv. ${player.stoveLevel}` : "-"}
+                  {player.stoveLevel
+                    ? `Lv. ${player.stoveLevel}${
+                        player.goldCityLevel
+                          ? ` / ทอง ${player.goldCityLevel}`
+                          : ""
+                      }`
+                    : "-"}
                 </p>
                 <div className="hidden sm:block">
                   <span className="inline-flex rounded-md border border-[#cfd8bc] bg-[#f1f5e9] px-3 py-1 text-sm font-medium text-[#455431]">
