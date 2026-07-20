@@ -2,6 +2,7 @@ import Image from "next/image";
 import { AddPlayerModal } from "@/app/add-player-modal";
 import { CopyButton } from "@/app/copy-button";
 import { RefreshGiftCodesButton } from "@/app/refresh-gift-codes-button";
+import { SendGiftAllButton } from "@/app/send-gift-all-button";
 import { StatusToggle } from "@/app/status-toggle";
 import { RowActions } from "@/app/sync-button";
 import { prisma } from "@/lib/prisma";
@@ -205,29 +206,7 @@ export default async function Home() {
               </div>
               <div className="relative flex w-full flex-col gap-3 sm:w-44">
                 <RefreshGiftCodesButton />
-                <button
-                  type="button"
-                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-[#b98a32] bg-[#171a12] px-4 text-sm font-semibold text-[#fff8df] shadow-md transition hover:bg-[#2b2f22] focus:outline-none focus:ring-2 focus:ring-[#caa35a] focus:ring-offset-2"
-                  aria-label="Send latest gift code to all players"
-                >
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  >
-                    <path d="M20 12v10H4V12" />
-                    <path d="M2 7h20v5H2z" />
-                    <path d="M12 22V7" />
-                    <path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z" />
-                    <path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z" />
-                  </svg>
-                  Send Gift All
-                </button>
+                <SendGiftAllButton />
               </div>
             </div>
           ) : (

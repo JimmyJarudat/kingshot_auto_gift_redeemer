@@ -327,6 +327,29 @@ export async function refreshGiftCodes() {
   }
 }
 
+export async function sendGiftCodeToAllPlayers() {
+  try {
+    const response = await fetch("https://n8n.jarudat.com/webhook/sent-all", {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    revalidatePath("/");
+
+    return {
+      ok: response.ok,
+      status: response.status,
+    };
+  } catch {
+    revalidatePath("/");
+
+    return {
+      ok: false,
+      status: 0,
+    };
+  }
+}
+
 export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
   const playerId = normalizePlayerId(playerIdInput);
 
