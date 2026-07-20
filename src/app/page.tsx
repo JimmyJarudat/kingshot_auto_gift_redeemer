@@ -225,7 +225,7 @@ export default async function Home() {
         </section>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/95 shadow-sm backdrop-blur-[1px]">
-          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[88px_1.15fr_0.95fr_110px_150px_120px_88px]">
+          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]">
             <span>Avatar</span>
             <span>In-game name</span>
             <span className="hidden sm:block">User ID</span>
@@ -239,7 +239,7 @@ export default async function Home() {
             <div className="divide-y divide-[#edf0e8]">
               {players.map((player) => (
               <article
-                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[88px_1.15fr_0.95fr_110px_150px_120px_88px]"
+                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]"
                 key={player.id}
               >
                 <Image

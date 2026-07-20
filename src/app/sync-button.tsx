@@ -2,7 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { deleteGameAccount, syncGameAccount } from "@/app/actions";
+import {
+  deleteGameAccount,
+  sendLatestGiftCodeToPlayer,
+  syncGameAccount,
+} from "@/app/actions";
 
 type SyncButtonProps = {
   playerId: string;
@@ -11,10 +15,13 @@ type SyncButtonProps = {
 export function RowActions({ playerId }: SyncButtonProps) {
   const router = useRouter();
   const [syncError, setSyncError] = useState(false);
+  const [sendError, setSendError] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isSyncPending, startSyncTransition] = useTransition();
+  const [isSendPending, startSendTransition] = useTransition();
   const [isDeletePending, startDeleteTransition] = useTransition();
+  const isBusy = isSyncPending || isSendPending || isDeletePending;
 
   function handleSync() {
     setSyncError(false);
@@ -25,6 +32,19 @@ export function RowActions({ playerId }: SyncButtonProps) {
         router.refresh();
       } catch {
         setSyncError(true);
+      }
+    });
+  }
+
+  function handleSendGift() {
+    setSendError(false);
+
+    startSendTransition(async () => {
+      try {
+        await sendLatestGiftCodeToPlayer(playerId);
+        router.refresh();
+      } catch {
+        setSendError(true);
       }
     });
   }
@@ -47,7 +67,7 @@ export function RowActions({ playerId }: SyncButtonProps) {
       <button
         type="button"
         onClick={handleSync}
-        disabled={isSyncPending || isDeletePending}
+        disabled={isBusy}
         title={syncError ? "Sync failed" : "Sync game profile"}
         aria-label="Sync game profile"
         className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
@@ -74,8 +94,53 @@ export function RowActions({ playerId }: SyncButtonProps) {
       </button>
       <button
         type="button"
+        onClick={handleSendGift}
+        disabled={isBusy}
+        title={sendError ? "Gift delivery failed" : "Send latest gift"}
+        aria-label="Send latest gift"
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+          sendError
+            ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
+            : "border-[#caa35a] bg-[#fff8df] text-[#7b5d1e] hover:bg-[#f5e8b9]"
+        }`}
+      >
+        {isSendPending ? (
+          <svg
+            aria-hidden="true"
+            className="h-4 w-4 animate-spin"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 12a9 9 0 0 1-9 9" />
+            <path d="M3 12a9 9 0 0 1 9-9" />
+          </svg>
+        ) : (
+          <svg
+            aria-hidden="true"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 12v10H4V12" />
+            <path d="M2 7h20v5H2z" />
+            <path d="M12 22V7" />
+            <path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z" />
+            <path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z" />
+          </svg>
+        )}
+      </button>
+      <button
+        type="button"
         onClick={() => setIsDeleteModalOpen(true)}
-        disabled={isSyncPending || isDeletePending}
+        disabled={isBusy}
         title={deleteError ? "Delete failed" : "Delete player"}
         aria-label="Delete player"
         className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
