@@ -53,7 +53,7 @@ export function AddPlayerModal() {
         setError(
           searchError instanceof Error
             ? searchError.message
-            : "ไม่สามารถค้นหาผู้เล่นได้",
+            : "Unable to find this player.",
         );
       }
     });
@@ -74,7 +74,7 @@ export function AddPlayerModal() {
         setError(
           importError instanceof Error
             ? importError.message
-            : "ไม่สามารถ import ผู้เล่นได้",
+            : "Unable to import this player.",
         );
       }
     });
@@ -87,7 +87,7 @@ export function AddPlayerModal() {
         onClick={() => setIsOpen(true)}
         className="h-11 rounded-md bg-[#314a2c] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#263d22]"
       >
-        Add ผู้เล่น
+        Add Player
       </button>
 
       {isOpen ? (
@@ -109,10 +109,10 @@ export function AddPlayerModal() {
                   id="add-player-title"
                   className="text-lg font-semibold text-[#171a12]"
                 >
-                  Add ผู้เล่น
+                  Add Player
                 </h2>
                 <p className="mt-1 text-sm text-[#68715a]">
-                  กรอกไอดีเพื่อค้นหาข้อมูลจากเกมก่อน import
+                  Enter a player ID, preview the game profile, then import it.
                 </p>
               </div>
               <button
@@ -129,7 +129,7 @@ export function AddPlayerModal() {
               <form onSubmit={handleSearch} className="grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="flex min-w-0 flex-col gap-2">
                   <span className="text-sm font-semibold text-[#384030]">
-                    ไอดีผู้เล่น
+                    Player ID
                   </span>
                   <input
                     value={playerId}
@@ -138,7 +138,7 @@ export function AddPlayerModal() {
                     inputMode="numeric"
                     pattern="[0-9]+"
                     required
-                    placeholder="เช่น 247069619"
+                    placeholder="e.g. 247069619"
                     className="h-11 rounded-md border border-[#cfd8bc] bg-[#fbfcf8] px-3 text-base text-[#171a12] outline-none transition-colors placeholder:text-[#8a927d] focus:border-[#748a4d]"
                   />
                 </label>
@@ -147,7 +147,7 @@ export function AddPlayerModal() {
                   disabled={isSearching || !playerId.trim()}
                   className="h-11 self-end rounded-md border border-[#314a2c] px-5 text-sm font-semibold text-[#314a2c] transition-colors hover:bg-[#f1f5e9] disabled:cursor-not-allowed disabled:opacity-55"
                 >
-                  {isSearching ? "กำลังค้นหา" : "ค้นหา"}
+                  {isSearching ? "Searching" : "Search"}
                 </button>
               </form>
 
@@ -163,7 +163,7 @@ export function AddPlayerModal() {
                     {avatarImage ? (
                       <Image
                         src={avatarImage}
-                        alt={`รูปโปรไฟล์ของ ${profile.nickname || profile.playerId}`}
+                        alt={`${profile.nickname || profile.playerId} profile avatar`}
                         width={72}
                         height={72}
                         className="h-[72px] w-[72px] rounded-md border border-[#d8ddcf] object-cover"
@@ -175,7 +175,7 @@ export function AddPlayerModal() {
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-lg font-semibold text-[#171a12]">
-                        {profile.nickname || "ไม่ระบุชื่อ"}
+                        {profile.nickname || "Unnamed player"}
                       </p>
                       <p className="mt-1 break-all font-mono text-sm text-[#4d5740]">
                         {profile.playerId}
@@ -184,11 +184,11 @@ export function AddPlayerModal() {
                         <span>Server {profile.kid ?? "-"}</span>
                         <span>Stove Lv. {profile.stoveLv ?? "-"}</span>
                         <span className="flex items-center gap-2">
-                          เมือง
+                          City
                           {stoveLvContent ? (
                             <Image
                               src={stoveLvContent}
-                              alt={`เมืองเลเวล ${profile.stoveLv ?? ""}`}
+                              alt={`Furnace level ${profile.stoveLv ?? ""}`}
                               width={24}
                               height={24}
                               className="h-6 w-6 object-contain"
@@ -209,7 +209,7 @@ export function AddPlayerModal() {
                       disabled={isImporting}
                       className="h-10 rounded-md bg-[#314a2c] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#263d22] disabled:cursor-not-allowed disabled:opacity-55"
                     >
-                      {isImporting ? "กำลัง import" : "Import"}
+                      {isImporting ? "Importing" : "Import"}
                     </button>
                   </div>
                 </div>

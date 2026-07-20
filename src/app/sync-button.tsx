@@ -48,8 +48,8 @@ export function RowActions({ playerId }: SyncButtonProps) {
         type="button"
         onClick={handleSync}
         disabled={isSyncPending || isDeletePending}
-        title={syncError ? "ซิงก์ไม่สำเร็จ" : "ซิงก์ข้อมูลจากเกม"}
-        aria-label="ซิงก์ข้อมูลจากเกม"
+        title={syncError ? "Sync failed" : "Sync game profile"}
+        aria-label="Sync game profile"
         className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
           syncError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
@@ -76,8 +76,8 @@ export function RowActions({ playerId }: SyncButtonProps) {
         type="button"
         onClick={() => setIsDeleteModalOpen(true)}
         disabled={isSyncPending || isDeletePending}
-        title={deleteError ? "ลบไม่สำเร็จ" : "ลบผู้เล่น"}
-        aria-label="ลบผู้เล่น"
+        title={deleteError ? "Delete failed" : "Delete player"}
+        aria-label="Delete player"
         className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
           deleteError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
@@ -123,10 +123,10 @@ export function RowActions({ playerId }: SyncButtonProps) {
                 id={`delete-player-${playerId}`}
                 className="text-lg font-semibold text-[#171a12]"
               >
-                ยืนยันการลบผู้เล่น
+                Delete player?
               </h2>
               <p className="mt-2 break-all text-sm text-[#68715a]">
-                ต้องการลบผู้เล่น ID {playerId} ออกจากระบบหรือไม่?
+                This will permanently remove player ID {playerId} from the system.
               </p>
             </div>
             <div className="flex justify-end gap-3 px-5 py-4">
@@ -136,7 +136,7 @@ export function RowActions({ playerId }: SyncButtonProps) {
                 disabled={isDeletePending}
                 className="h-10 rounded-md border border-[#cfd8bc] px-4 text-sm font-semibold text-[#314a2c] transition-colors hover:bg-[#f1f5e9] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                ยกเลิก
+                Cancel
               </button>
               <button
                 type="button"
@@ -144,7 +144,7 @@ export function RowActions({ playerId }: SyncButtonProps) {
                 disabled={isDeletePending}
                 className="h-10 rounded-md bg-[#8c3f25] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#71301b] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isDeletePending ? "กำลังลบ" : "ลบผู้เล่น"}
+                {isDeletePending ? "Deleting" : "Delete player"}
               </button>
             </div>
           </div>

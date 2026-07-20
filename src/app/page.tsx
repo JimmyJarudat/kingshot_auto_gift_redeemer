@@ -46,7 +46,7 @@ export default async function Home() {
 
   const players = accounts.map((account, index) => ({
     id: account.player_id,
-    name: account.nickname?.trim() || "ไม่ระบุชื่อ",
+    name: account.nickname?.trim() || "Unnamed player",
     server: account.server_id?.trim() || (account.kid ? String(account.kid) : "-"),
     isActive: account.is_active,
     avatar: account.avatar_image?.trim() || avatars[index % avatars.length],
@@ -55,57 +55,46 @@ export default async function Home() {
     recharge: account.total_recharge_amount,
   }));
 
-  const activeCount = players.filter((player) => player.isActive).length;
-  const serverCount = new Set(
-    players
-      .map((player) => player.server)
-      .filter((server) => server !== "-"),
-  ).size;
-
   return (
-    <main className="min-h-screen bg-[#f7f8f3] text-[#161814]">
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-        <header className="flex flex-col gap-5 border-b border-[#d9ddcf] pb-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase text-[#5e6b44]">
-              Kingshot Accounts
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-[#171a12] sm:text-4xl">
-              รายชื่อผู้เล่น
-            </h1>
-          </div>
-            <AddPlayerModal />
-          </div>
-          <div className="grid grid-cols-3 gap-3 text-center sm:min-w-80">
-            <div className="border-l border-[#d9ddcf] px-4">
-              <p className="text-2xl font-semibold">{players.length}</p>
-              <p className="text-xs font-medium uppercase text-[#68715a]">
-                Users
-              </p>
-            </div>
-            <div className="border-l border-[#d9ddcf] px-4">
-              <p className="text-2xl font-semibold">{activeCount}</p>
-              <p className="text-xs font-medium uppercase text-[#68715a]">
-                Active
-              </p>
-            </div>
-            <div className="border-l border-[#d9ddcf] px-4">
-              <p className="text-2xl font-semibold">{serverCount}</p>
-              <p className="text-xs font-medium uppercase text-[#68715a]">
-                Servers
-              </p>
+    <main className="relative min-h-screen overflow-hidden bg-[#f7f8f3] text-[#161814]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        style={{
+          backgroundImage: "url('https://kingshot.gg/images/bg_hero.jpg')",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[#f7f8f3]/80"
+      />
+      <section className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
+        <header className="flex items-center justify-between gap-4 border-b border-[#d9ddcf] pb-6">
+          <div className="flex min-w-0 items-center gap-4">
+            <Image
+              src="https://ks-giftcode.centurygame.com/img/logo.6037a257.png"
+              alt="Kingshot"
+              width={192}
+              height={64}
+              className="h-14 w-auto object-contain"
+              priority
+            />
+            <div className="hidden min-w-0 sm:block">
+              <h1 className="truncate text-2xl font-semibold text-[#171a12]">
+                Kingshot Auto Gift Redeemer
+              </h1>
             </div>
           </div>
+          <AddPlayerModal />
         </header>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white shadow-sm">
           <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]">
-            <span>รูป</span>
-            <span>ชื่อจากเกม</span>
+            <span>Avatar</span>
+            <span>In-game name</span>
             <span className="hidden sm:block">User ID</span>
-            <span className="hidden sm:block">เตา</span>
-            <span className="hidden sm:block">สถานะ</span>
+            <span className="hidden sm:block">Stove Level</span>
+            <span className="hidden sm:block">Status</span>
             <span className="hidden sm:block">Action</span>
           </div>
 
@@ -118,7 +107,7 @@ export default async function Home() {
               >
                 <Image
                   src={player.avatar}
-                  alt={`รูปโปรไฟล์ของ ${player.name}`}
+                  alt={`${player.name} profile avatar`}
                   width={64}
                   height={64}
                   className="h-16 w-16 rounded-md border border-[#d8ddcf] bg-[#f3f5ed]"
@@ -143,7 +132,7 @@ export default async function Home() {
                   {player.stoveLvContent ? (
                     <Image
                       src={player.stoveLvContent}
-                      alt={`เมืองเลเวล ${player.stoveLevel ?? ""}`}
+                      alt={`Furnace level ${player.stoveLevel ?? ""}`}
                       width={24}
                       height={24}
                       className="h-6 w-6 object-contain"
@@ -168,10 +157,10 @@ export default async function Home() {
           ) : (
             <div className="px-4 py-12 text-center">
               <p className="text-lg font-semibold text-[#171a12]">
-                ยังไม่มีข้อมูลผู้เล่น
+                No players yet
               </p>
               <p className="mt-2 text-sm text-[#68715a]">
-                เมื่อมีข้อมูลในตาราง game_accounts รายชื่อจะแสดงที่หน้านี้
+                Imported game accounts will appear here.
               </p>
             </div>
           )}

@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "got-global-avatar.akamaized.net",
         pathname: "/img/icon/**",
       },
+      {
+        protocol: "https",
+        hostname: "ks-giftcode.centurygame.com",
+        pathname: "/img/**",
+      },
     ],
   },
 };

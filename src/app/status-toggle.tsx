@@ -33,7 +33,7 @@ export function StatusToggle({ playerId, isActive }: StatusToggleProps) {
       type="button"
       role="switch"
       aria-checked={checked}
-      aria-label={`${checked ? "ปิด" : "เปิด"}สถานะผู้เล่น ${playerId}`}
+      aria-label={`${checked ? "Disable" : "Enable"} player ${playerId}`}
       disabled={isPending}
       onClick={handleToggle}
       className={`inline-flex h-7 w-12 items-center rounded-full border p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
