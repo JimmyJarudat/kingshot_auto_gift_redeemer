@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "got-global-avatar.akamaized.net",
         pathname: "/avatar/**",
       },
+      {
+        protocol: "https",
+        hostname: "got-global-avatar.akamaized.net",
+        pathname: "/img/icon/**",
+      },
     ],
   },
 };

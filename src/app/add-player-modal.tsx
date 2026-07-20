@@ -9,6 +9,19 @@ import {
   type GameAccountProfile,
 } from "@/app/actions";
 
+function getSafeImageUrl(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AddPlayerModal() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +30,8 @@ export function AddPlayerModal() {
   const [error, setError] = useState<string | null>(null);
   const [isSearching, startSearchTransition] = useTransition();
   const [isImporting, startImportTransition] = useTransition();
+  const avatarImage = getSafeImageUrl(profile?.avatarImage ?? null);
+  const stoveLvContent = getSafeImageUrl(profile?.stoveLvContent ?? null);
 
   function closeModal() {
     setIsOpen(false);
@@ -145,9 +160,9 @@ export function AddPlayerModal() {
               {profile ? (
                 <div className="rounded-lg border border-[#d9ddcf] bg-[#fbfcf8] p-4">
                   <div className="flex gap-4">
-                    {profile.avatarImage ? (
+                    {avatarImage ? (
                       <Image
-                        src={profile.avatarImage}
+                        src={avatarImage}
                         alt={`รูปโปรไฟล์ของ ${profile.nickname || profile.playerId}`}
                         width={72}
                         height={72}
@@ -168,11 +183,19 @@ export function AddPlayerModal() {
                       <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-[#384030]">
                         <span>Server {profile.kid ?? "-"}</span>
                         <span>Stove Lv. {profile.stoveLv ?? "-"}</span>
-                        <span>
-                          เมือง{" "}
-                          {profile.goldCityLevel
-                            ? `ทอง ${profile.goldCityLevel}`
-                            : "-"}
+                        <span className="flex items-center gap-2">
+                          เมือง
+                          {stoveLvContent ? (
+                            <Image
+                              src={stoveLvContent}
+                              alt={`เมืองเลเวล ${profile.stoveLv ?? ""}`}
+                              width={24}
+                              height={24}
+                              className="h-6 w-6 object-contain"
+                            />
+                          ) : (
+                            "-"
+                          )}
                         </span>
                         <span>Recharge {profile.totalRechargeAmount ?? 0}</span>
                       </div>

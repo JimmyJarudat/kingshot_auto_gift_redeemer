@@ -10,12 +10,17 @@ const avatars = [
   "/avatars/player-crown.svg",
 ];
 
-function getGoldCityLevel(stoveLevel: number | null) {
-  if (!stoveLevel || stoveLevel <= 30) {
+function getSafeImageUrl(value: string | null) {
+  if (!value) {
     return null;
   }
 
-  return Math.floor((stoveLevel - 31) / 5) + 1;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
 }
 
 export default async function Home() {
@@ -44,7 +49,7 @@ export default async function Home() {
     status: account.is_active ? "Active" : "Inactive",
     avatar: account.avatar_image?.trim() || avatars[index % avatars.length],
     stoveLevel: account.stove_lv,
-    goldCityLevel: getGoldCityLevel(account.stove_lv),
+    stoveLvContent: getSafeImageUrl(account.stove_lv_content),
     recharge: account.total_recharge_amount,
   }));
 
@@ -130,15 +135,18 @@ export default async function Home() {
                 <p className="hidden break-all font-mono text-sm text-[#384030] sm:block">
                   {player.id}
                 </p>
-                <p className="hidden text-sm font-medium text-[#384030] sm:block">
-                  {player.stoveLevel
-                    ? `Lv. ${player.stoveLevel}${
-                        player.goldCityLevel
-                          ? ` / ทอง ${player.goldCityLevel}`
-                          : ""
-                      }`
-                    : "-"}
-                </p>
+                <div className="hidden items-center gap-2 text-sm font-medium text-[#384030] sm:flex">
+                  <span>{player.stoveLevel ? `Lv. ${player.stoveLevel}` : "-"}</span>
+                  {player.stoveLvContent ? (
+                    <Image
+                      src={player.stoveLvContent}
+                      alt={`เมืองเลเวล ${player.stoveLevel ?? ""}`}
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 object-contain"
+                    />
+                  ) : null}
+                </div>
                 <div className="hidden sm:block">
                   <span className="inline-flex rounded-md border border-[#cfd8bc] bg-[#f1f5e9] px-3 py-1 text-sm font-medium text-[#455431]">
                     {player.status}
