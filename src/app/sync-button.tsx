@@ -84,7 +84,7 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
         disabled={isBusy}
         title={syncError ? "Sync failed" : "Sync game profile"}
         aria-label="Sync game profile"
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
           syncError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
             : "border-[#cfd8bc] bg-white text-[#314a2c] hover:bg-[#f1f5e9]"
@@ -118,7 +118,7 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
               : "Send latest gift"
         }
         aria-label="Send latest gift"
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
           sendError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
             : sendLocked
@@ -165,7 +165,7 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
         disabled={isBusy}
         title={deleteError ? "Delete failed" : "Delete player"}
         aria-label="Delete player"
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
           deleteError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
             : "border-[#e3c8bd] bg-white text-[#8c3f25] hover:bg-[#fff5f0]"

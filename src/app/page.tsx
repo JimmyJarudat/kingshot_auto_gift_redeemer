@@ -227,47 +227,77 @@ export default async function Home() {
           )}
         </section>
 
-        <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/95 shadow-sm backdrop-blur-[1px]">
-          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]">
+        <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/90 shadow-sm backdrop-blur-[1px]">
+          <div className="hidden gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]">
             <span>Avatar</span>
             <span>In-game name</span>
-            <span className="hidden sm:block">User ID</span>
-            <span className="hidden sm:block">Stove Level</span>
-            <span className="hidden sm:block">Latest Gift</span>
-            <span className="hidden sm:block">Status</span>
-            <span className="hidden sm:block">Action</span>
+            <span>User ID</span>
+            <span>Stove Level</span>
+            <span>Latest Gift</span>
+            <span>Status</span>
+            <span>Action</span>
           </div>
 
           {players.length > 0 ? (
-            <div className="divide-y divide-[#edf0e8]">
+            <div className="space-y-3 bg-[#eef1e8]/70 p-3 sm:space-y-0 sm:divide-y sm:divide-[#edf0e8] sm:bg-transparent sm:p-0">
               {players.map((player) => (
               <article
-                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]"
+                className="grid gap-3 rounded-lg border border-[#d9ddcf] bg-white px-3 py-3 shadow-sm transition-colors hover:bg-[#fafbf7] sm:rounded-none sm:border-0 sm:bg-transparent sm:px-4 sm:py-4 sm:shadow-none sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px] sm:items-center"
                 key={player.id}
               >
-                <Image
-                  src={player.avatar}
-                  alt={`${player.name} profile avatar`}
-                  width={64}
-                  height={64}
-                  className="h-16 w-16 rounded-md border border-[#d8ddcf] bg-[#f3f5ed]"
-                  priority
-                />
+                <div className="grid grid-cols-[68px_1fr] gap-3 sm:contents">
+                  <Image
+                    src={player.avatar}
+                    alt={`${player.name} profile avatar`}
+                    width={64}
+                    height={64}
+                    className="h-16 w-16 rounded-md border border-[#d8ddcf] bg-[#f3f5ed]"
+                    priority
+                  />
                 <div className="min-w-0">
-                  <h2 className="truncate text-lg font-semibold text-[#171a12]">
-                    {player.name}
-                  </h2>
-                  <p className="mt-1 text-sm text-[#68715a]">
-                    Server {player.server}
-                  </p>
+                  <div className="flex min-w-0 items-start justify-between gap-2 sm:block">
+                    <div className="min-w-0">
+                      <h2 className="truncate text-lg font-semibold text-[#171a12]">
+                        {player.name}
+                      </h2>
+                      <p className="mt-1 text-sm text-[#68715a]">
+                        Server {player.server}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-md border px-2.5 py-1 text-xs font-semibold sm:hidden ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
+                    >
+                      {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
+                    </span>
+                  </div>
                   <p className="mt-2 break-all font-mono text-xs text-[#4d5740] sm:hidden">
                     {player.id}
                   </p>
-                  <div className="mt-3 sm:hidden">
-                    <span
-                      className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
-                    >
+                </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 sm:hidden">
+                  <div className="rounded-md border border-[#e5e8df] bg-[#fafbf7] px-3 py-2">
+                    <span className="block text-[10px] font-semibold uppercase text-[#7b826f]">
+                      Furnace
+                    </span>
+                    <span className="mt-1 block truncate text-sm font-semibold text-[#384030]">
+                      {player.stoveLevel ? `Lv. ${player.stoveLevel}` : "-"}
+                    </span>
+                  </div>
+                  <div className="rounded-md border border-[#e5e8df] bg-[#fafbf7] px-3 py-2">
+                    <span className="block text-[10px] font-semibold uppercase text-[#7b826f]">
+                      Gift
+                    </span>
+                    <span className="mt-1 block truncate text-sm font-semibold text-[#384030]">
                       {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
+                    </span>
+                  </div>
+                  <div className="rounded-md border border-[#e5e8df] bg-[#fafbf7] px-3 py-2">
+                    <span className="block text-[10px] font-semibold uppercase text-[#7b826f]">
+                      Account
+                    </span>
+                    <span className="mt-1 block truncate text-sm font-semibold text-[#384030]">
+                      {player.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </div>
@@ -307,6 +337,23 @@ export default async function Home() {
                     playerId={player.id}
                     latestGiftStatus={player.latestGiftStatus}
                   />
+                </div>
+                <div className="flex items-center justify-between gap-3 border-t border-[#edf0e8] pt-3 sm:hidden">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <StatusToggle
+                      playerId={player.id}
+                      isActive={player.isActive}
+                    />
+                    <span className="truncate text-sm font-medium text-[#455431]">
+                      Account
+                    </span>
+                  </div>
+                  <div className="shrink-0">
+                    <RowActions
+                      playerId={player.id}
+                      latestGiftStatus={player.latestGiftStatus}
+                    />
+                  </div>
                 </div>
               </article>
               ))}
