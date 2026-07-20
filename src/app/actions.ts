@@ -92,6 +92,21 @@ async function fetchGameProfile(playerId: string) {
   return payload.data;
 }
 
+function mapLoginDataToProfile(
+  profile: NonNullable<LoginResponse["data"]>,
+  fallbackPlayerId: string,
+) {
+  return {
+    playerId: profile.fid ? String(profile.fid) : fallbackPlayerId,
+    nickname: cleanNickname(profile.nickname),
+    kid: profile.kid ?? null,
+    stoveLv: profile.stove_lv ?? null,
+    stoveLvContent: profile.stove_lv_content ?? null,
+    avatarImage: profile.avatar_image ?? null,
+    totalRechargeAmount: profile.total_recharge_amount ?? null,
+  } satisfies GameAccountProfile;
+}
+
 export async function searchGameAccount(playerIdInput: string) {
   const playerId = normalizePlayerId(playerIdInput);
 
@@ -101,15 +116,7 @@ export async function searchGameAccount(playerIdInput: string) {
 
   const profile = await fetchGameProfile(playerId);
 
-  return {
-    playerId: profile.fid ? String(profile.fid) : playerId,
-    nickname: cleanNickname(profile.nickname),
-    kid: profile.kid ?? null,
-    stoveLv: profile.stove_lv ?? null,
-    stoveLvContent: profile.stove_lv_content ?? null,
-    avatarImage: profile.avatar_image ?? null,
-    totalRechargeAmount: profile.total_recharge_amount ?? null,
-  } satisfies GameAccountProfile;
+  return mapLoginDataToProfile(profile, playerId);
 }
 
 export async function importGameAccount(profile: GameAccountProfile) {
@@ -165,6 +172,52 @@ export async function updateGameAccountStatus(playerIdInput: string, isActive: b
     data: {
       is_active: isActive,
       updated_at: new Date(),
+    },
+  });
+
+  revalidatePath("/");
+}
+
+export async function syncGameAccount(playerIdInput: string) {
+  const playerId = normalizePlayerId(playerIdInput);
+
+  if (!playerId) {
+    throw new Error("Player ID is required");
+  }
+
+  const loginData = await fetchGameProfile(playerId);
+  const profile = mapLoginDataToProfile(loginData, playerId);
+
+  await prisma.game_accounts.update({
+    where: {
+      player_id: playerId,
+    },
+    data: {
+      player_id: profile.playerId,
+      nickname: profile.nickname,
+      server_id: profile.kid ? String(profile.kid) : null,
+      kid: profile.kid,
+      stove_lv: profile.stoveLv,
+      stove_lv_content: profile.stoveLvContent,
+      avatar_image: profile.avatarImage,
+      total_recharge_amount: profile.totalRechargeAmount,
+      updated_at: new Date(),
+    },
+  });
+
+  revalidatePath("/");
+}
+
+export async function deleteGameAccount(playerIdInput: string) {
+  const playerId = normalizePlayerId(playerIdInput);
+
+  if (!playerId) {
+    throw new Error("Player ID is required");
+  }
+
+  await prisma.game_accounts.delete({
+    where: {
+      player_id: playerId,
     },
   });
 

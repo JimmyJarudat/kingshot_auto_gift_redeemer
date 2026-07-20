@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { AddPlayerModal } from "@/app/add-player-modal";
 import { StatusToggle } from "@/app/status-toggle";
+import { SyncButton } from "@/app/sync-button";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -99,19 +100,20 @@ export default async function Home() {
         </header>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white shadow-sm">
-          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_120px]">
+          <div className="grid grid-cols-[88px_1fr] gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]">
             <span>รูป</span>
             <span>ชื่อจากเกม</span>
             <span className="hidden sm:block">User ID</span>
             <span className="hidden sm:block">เตา</span>
             <span className="hidden sm:block">สถานะ</span>
+            <span className="hidden sm:block">Action</span>
           </div>
 
           {players.length > 0 ? (
             <div className="divide-y divide-[#edf0e8]">
               {players.map((player) => (
               <article
-                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[104px_1.2fr_1fr_120px_120px]"
+                className="grid grid-cols-[88px_1fr] items-center gap-4 px-4 py-4 transition-colors hover:bg-[#fafbf7] sm:grid-cols-[104px_1.2fr_1fr_120px_140px_96px]"
                 key={player.id}
               >
                 <Image
@@ -156,6 +158,9 @@ export default async function Home() {
                   <span className="text-sm font-medium text-[#455431]">
                     {player.isActive ? "Active" : "Inactive"}
                   </span>
+                </div>
+                <div className="hidden sm:block">
+                  <SyncButton playerId={player.id} />
                 </div>
               </article>
               ))}
