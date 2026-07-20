@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { AddPlayerModal } from "@/app/add-player-modal";
 import { StatusToggle } from "@/app/status-toggle";
-import { SyncButton } from "@/app/sync-button";
+import { RowActions } from "@/app/sync-button";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -160,7 +160,7 @@ export default async function Home() {
                   </span>
                 </div>
                 <div className="hidden sm:block">
-                  <SyncButton playerId={player.id} />
+                  <RowActions playerId={player.id} />
                 </div>
               </article>
               ))}
