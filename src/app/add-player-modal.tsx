@@ -22,7 +22,11 @@ function getSafeImageUrl(value: string | null) {
   }
 }
 
-export function AddPlayerModal() {
+type AddPlayerModalProps = {
+  triggerVariant?: "default" | "mobile";
+};
+
+export function AddPlayerModal({ triggerVariant = "default" }: AddPlayerModalProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [playerId, setPlayerId] = useState("");
@@ -85,8 +89,27 @@ export function AddPlayerModal() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="h-11 rounded-md bg-[#314a2c] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#263d22]"
+        className={`inline-flex items-center justify-center gap-1.5 rounded-md font-semibold transition-colors ${
+          triggerVariant === "mobile"
+            ? "h-9 border border-[#caa35a] bg-white/90 px-3 text-xs text-[#6f541f] shadow-sm hover:bg-[#fff8df]"
+            : "h-11 bg-[#314a2c] px-5 text-sm text-white hover:bg-[#263d22]"
+        }`}
       >
+        {triggerVariant === "mobile" ? (
+          <svg
+            aria-hidden="true"
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+          >
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+        ) : null}
         Add Player
       </button>
 

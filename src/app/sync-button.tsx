@@ -7,9 +7,10 @@ import { deleteGameAccount, sendLatestGiftCodeToPlayer } from "@/app/actions";
 type SyncButtonProps = {
   playerId: string;
   latestGiftStatus: string;
+  compact?: boolean;
 };
 
-export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
+export function RowActions({ playerId, latestGiftStatus, compact = false }: SyncButtonProps) {
   const router = useRouter();
   const [sendError, setSendError] = useState(false);
   const [sendLocked, setSendLocked] = useState(
@@ -59,29 +60,31 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
-        disabled
-        title="Profile sync is unavailable after the Kingshot redeem update"
-        aria-label="Profile sync unavailable"
-        className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-[#d8ddcf] bg-[#f7f8f3] text-[#8b947f] opacity-60 sm:h-9 sm:w-9"
-      >
-        <svg
-          aria-hidden="true"
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {compact ? null : (
+        <button
+          type="button"
+          disabled
+          title="Profile sync is unavailable after the Kingshot redeem update"
+          aria-label="Profile sync unavailable"
+          className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-[#d8ddcf] bg-[#f7f8f3] text-[#8b947f] opacity-60 sm:h-9 sm:w-9"
         >
-          <path d="M21 12a9 9 0 0 1-15.4 6.4" />
-          <path d="M3 12A9 9 0 0 1 18.4 5.6" />
-          <path d="M18 2v4h4" />
-          <path d="M6 22v-4H2" />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 12a9 9 0 0 1-15.4 6.4" />
+            <path d="M3 12A9 9 0 0 1 18.4 5.6" />
+            <path d="M18 2v4h4" />
+            <path d="M6 22v-4H2" />
+          </svg>
+        </button>
+      )}
       <button
         type="button"
         onClick={handleSendGift}
@@ -94,7 +97,9 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
               : "Send latest gift"
         }
         aria-label="Send latest gift"
-        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
+        className={`inline-flex items-center justify-center rounded-md border font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+          compact ? "h-8 gap-1.5 px-2.5 text-xs" : "h-10 w-10 sm:h-9 sm:w-9"
+        } ${
           sendError
             ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
             : sendLocked
@@ -105,7 +110,7 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
         {isSendPending ? (
           <svg
             aria-hidden="true"
-            className="h-4 w-4 animate-spin"
+            className={`${compact ? "h-3.5 w-3.5" : "h-4 w-4"} animate-spin`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -119,7 +124,7 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
         ) : (
           <svg
             aria-hidden="true"
-            className="h-4 w-4"
+            className={compact ? "h-3.5 w-3.5" : "h-4 w-4"}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -134,36 +139,41 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
             <path d="M12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z" />
           </svg>
         )}
+        {compact ? (
+          <span>{isSendPending ? "Sending" : sendLocked ? "Sent" : "Send"}</span>
+        ) : null}
       </button>
-      <button
-        type="button"
-        onClick={() => setIsDeleteModalOpen(true)}
-        disabled={isBusy}
-        title={deleteError ? "Delete failed" : "Delete player"}
-        aria-label="Delete player"
-        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
-          deleteError
-            ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
-            : "border-[#e3c8bd] bg-white text-[#8c3f25] hover:bg-[#fff5f0]"
-        }`}
-      >
-        <svg
-          aria-hidden="true"
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {compact ? null : (
+        <button
+          type="button"
+          onClick={() => setIsDeleteModalOpen(true)}
+          disabled={isBusy}
+          title={deleteError ? "Delete failed" : "Delete player"}
+          aria-label="Delete player"
+          className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
+            deleteError
+              ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
+              : "border-[#e3c8bd] bg-white text-[#8c3f25] hover:bg-[#fff5f0]"
+          }`}
         >
-          <path d="M3 6h18" />
-          <path d="M8 6V4h8v2" />
-          <path d="M19 6l-1 14H6L5 6" />
-          <path d="M10 11v5" />
-          <path d="M14 11v5" />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v5" />
+            <path d="M14 11v5" />
+          </svg>
+        </button>
+      )}
       {isDeleteModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 py-6">
           <div

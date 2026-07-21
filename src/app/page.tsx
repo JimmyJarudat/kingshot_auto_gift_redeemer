@@ -213,8 +213,19 @@ export default async function Home() {
               </p>
             </div>
           </div>
-          <AddPlayerModal />
+          <div>
+            <AddPlayerModal />
+          </div>
         </header>
+
+        <div className="rounded-lg border border-[#caa35a]/70 bg-[#171a12]/90 px-4 py-3 shadow-sm ring-1 ring-white/10 sm:hidden">
+          <h1 className="text-xl font-semibold text-[#fff8df]">
+            KON Gift Redeemer
+          </h1>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#d7bd78]">
+            KILLERSofNIGHT Alliance
+          </p>
+        </div>
 
         <section className="overflow-hidden rounded-lg border border-[#caa35a] bg-[#fff8df]/95 shadow-lg shadow-black/10 backdrop-blur-[1px]">
           {featuredGiftCode ? (
@@ -298,8 +309,7 @@ export default async function Home() {
                     className="h-16 w-16 rounded-md border border-[#d8ddcf] bg-[#f3f5ed]"
                     priority
                   />
-                <div className="min-w-0">
-                  <div className="flex min-w-0 items-start justify-between gap-2 sm:block">
+                  <div className="grid min-w-0 grid-cols-[1fr_auto] gap-x-3 gap-y-2 sm:block">
                     <div className="min-w-0">
                       <h2 className="truncate text-lg font-semibold text-[#171a12]">
                         {player.name}
@@ -309,40 +319,30 @@ export default async function Home() {
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-md border px-2.5 py-1 text-xs font-semibold sm:hidden ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
+                      className={`shrink-0 self-start rounded-md border px-2.5 py-1 text-xs font-semibold sm:hidden ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
                     >
                       {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
                     </span>
-                  </div>
-                  <p className="mt-2 break-all font-mono text-xs text-[#4d5740] sm:hidden">
-                    {player.id}
-                  </p>
-                </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 sm:hidden">
-                  <div className="rounded-md border border-[#e5e8df] bg-[#fafbf7] px-3 py-2">
-                    <span className="block text-[10px] font-semibold uppercase text-[#7b826f]">
-                      Furnace
-                    </span>
-                    <span className="mt-1 block truncate text-sm font-semibold text-[#384030]">
-                      {player.stoveLevel ? `Lv. ${player.stoveLevel}` : "-"}
-                    </span>
-                  </div>
-                  <div className="rounded-md border border-[#e5e8df] bg-[#fafbf7] px-3 py-2">
-                    <span className="block text-[10px] font-semibold uppercase text-[#7b826f]">
-                      Gift
-                    </span>
-                    <span className="mt-1 block truncate text-sm font-semibold text-[#384030]">
-                      {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
-                    </span>
-                  </div>
-                  <div className="rounded-md border border-[#e5e8df] bg-[#fafbf7] px-3 py-2">
-                    <span className="block text-[10px] font-semibold uppercase text-[#7b826f]">
-                      Account
-                    </span>
-                    <span className="mt-1 block truncate text-sm font-semibold text-[#384030]">
-                      {player.isActive ? "Active" : "Inactive"}
-                    </span>
+                    <p className="min-w-0 break-all font-mono text-xs text-[#4d5740] sm:hidden">
+                      {player.id}
+                    </p>
+                    <div className="flex items-end justify-end gap-2 self-end justify-self-end sm:hidden">
+                      <div className="flex flex-col items-end gap-1">
+                        <StatusToggle
+                          playerId={player.id}
+                          isActive={player.isActive}
+                          compact
+                        />
+                        <span className="whitespace-nowrap text-[10px] font-medium text-[#68715a]">
+                          Bot {player.isActive ? "on" : "off"}
+                        </span>
+                      </div>
+                      <RowActions
+                        playerId={player.id}
+                        latestGiftStatus={player.latestGiftStatus}
+                        compact
+                      />
+                    </div>
                   </div>
                 </div>
                 <p className="hidden break-all font-mono text-sm text-[#384030] sm:block">
@@ -381,23 +381,6 @@ export default async function Home() {
                     playerId={player.id}
                     latestGiftStatus={player.latestGiftStatus}
                   />
-                </div>
-                <div className="flex items-center justify-between gap-3 border-t border-[#edf0e8] pt-3 sm:hidden">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <StatusToggle
-                      playerId={player.id}
-                      isActive={player.isActive}
-                    />
-                    <span className="truncate text-sm font-medium text-[#455431]">
-                      Account
-                    </span>
-                  </div>
-                  <div className="shrink-0">
-                    <RowActions
-                      playerId={player.id}
-                      latestGiftStatus={player.latestGiftStatus}
-                    />
-                  </div>
                 </div>
               </article>
               ))}

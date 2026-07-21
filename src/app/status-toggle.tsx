@@ -7,9 +7,10 @@ import { updateGameAccountStatus } from "@/app/actions";
 type StatusToggleProps = {
   playerId: string;
   isActive: boolean;
+  compact?: boolean;
 };
 
-export function StatusToggle({ playerId, isActive }: StatusToggleProps) {
+export function StatusToggle({ playerId, isActive, compact = false }: StatusToggleProps) {
   const router = useRouter();
   const [checked, setChecked] = useState(isActive);
   const [isPending, startTransition] = useTransition();
@@ -36,15 +37,19 @@ export function StatusToggle({ playerId, isActive }: StatusToggleProps) {
       aria-label={`${checked ? "Disable" : "Enable"} player ${playerId}`}
       disabled={isPending}
       onClick={handleToggle}
-      className={`inline-flex h-7 w-12 items-center rounded-full border p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+      className={`inline-flex items-center rounded-full border p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+        compact ? "h-5 w-9" : "h-7 w-12"
+      } ${
         checked
           ? "border-[#7d9655] bg-[#7d9655]"
           : "border-[#c7cdbc] bg-[#eef1e8]"
       }`}
     >
       <span
-        className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-          checked ? "translate-x-5" : "translate-x-0"
+        className={`rounded-full bg-white shadow-sm transition-transform ${
+          compact ? "h-3.5 w-3.5" : "h-5 w-5"
+        } ${
+          checked ? (compact ? "translate-x-4" : "translate-x-5") : "translate-x-0"
         }`}
       />
     </button>
