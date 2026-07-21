@@ -58,7 +58,7 @@ export function RefreshGiftCodesButton() {
       <svg
         aria-hidden="true"
         viewBox="0 0 24 24"
-        className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`}
+        className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
