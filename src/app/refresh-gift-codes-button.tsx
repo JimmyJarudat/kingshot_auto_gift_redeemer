@@ -1,32 +1,48 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { refreshGiftCodes } from "@/app/actions";
+
+function wait(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
 
 export function RefreshGiftCodesButton() {
   const router = useRouter();
   const [hasError, setHasError] = useState(false);
   const [statusCode, setStatusCode] = useState<number | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  function handleRefresh() {
+  async function handleRefresh() {
+    setIsRefreshing(true);
     setHasError(false);
     setStatusCode(null);
 
-    startTransition(async () => {
+    try {
       const result = await refreshGiftCodes();
       setHasError(!result.ok);
       setStatusCode(result.status);
       router.refresh();
-    });
+
+      if (result.ok) {
+        for (const delay of [2000, 4000, 6000, 8000]) {
+          await wait(delay);
+          router.refresh();
+        }
+      }
+    } finally {
+      setIsRefreshing(false);
+    }
   }
 
   return (
     <button
       type="button"
       onClick={handleRefresh}
-      disabled={isPending}
+      disabled={isRefreshing}
       title={
         hasError
           ? `Refresh failed${statusCode ? ` (${statusCode})` : ""}`
@@ -54,7 +70,7 @@ export function RefreshGiftCodesButton() {
         <path d="M18 2v4h4" />
         <path d="M6 22v-4H2" />
       </svg>
-      {isPending ? "Refreshing" : hasError ? "Failed" : "Refresh"}
+      {isRefreshing ? "Updating" : hasError ? "Failed" : "Refresh"}
     </button>
   );
 }
