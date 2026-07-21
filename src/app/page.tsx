@@ -80,6 +80,9 @@ export default async function Home() {
       },
     }),
     prisma.gift_codes.findFirst({
+      where: {
+        status: "active",
+      },
       orderBy: {
         first_seen_at: "desc",
       },
