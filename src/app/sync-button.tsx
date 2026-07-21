@@ -2,11 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import {
-  deleteGameAccount,
-  sendLatestGiftCodeToPlayer,
-  syncGameAccount,
-} from "@/app/actions";
+import { deleteGameAccount, sendLatestGiftCodeToPlayer } from "@/app/actions";
 
 type SyncButtonProps = {
   playerId: string;
@@ -15,7 +11,6 @@ type SyncButtonProps = {
 
 export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
   const router = useRouter();
-  const [syncError, setSyncError] = useState(false);
   const [sendError, setSendError] = useState(false);
   const [sendLocked, setSendLocked] = useState(
     latestGiftStatus === "success" ||
@@ -24,23 +19,9 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
   );
   const [deleteError, setDeleteError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isSyncPending, startSyncTransition] = useTransition();
   const [isSendPending, startSendTransition] = useTransition();
   const [isDeletePending, startDeleteTransition] = useTransition();
-  const isBusy = isSyncPending || isSendPending || isDeletePending;
-
-  function handleSync() {
-    setSyncError(false);
-
-    startSyncTransition(async () => {
-      try {
-        await syncGameAccount(playerId);
-        router.refresh();
-      } catch {
-        setSyncError(true);
-      }
-    });
-  }
+  const isBusy = isSendPending || isDeletePending;
 
   function handleSendGift() {
     if (sendLocked) {
@@ -80,19 +61,14 @@ export function RowActions({ playerId, latestGiftStatus }: SyncButtonProps) {
     <div className="flex items-center gap-2">
       <button
         type="button"
-        onClick={handleSync}
-        disabled={isBusy}
-        title={syncError ? "Sync failed" : "Sync game profile"}
-        aria-label="Sync game profile"
-        className={`inline-flex h-10 w-10 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9 ${
-          syncError
-            ? "border-[#d89a7f] bg-[#fff5f0] text-[#8c3f25]"
-            : "border-[#cfd8bc] bg-white text-[#314a2c] hover:bg-[#f1f5e9]"
-        }`}
+        disabled
+        title="Profile sync is unavailable after the Kingshot redeem update"
+        aria-label="Profile sync unavailable"
+        className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-[#d8ddcf] bg-[#f7f8f3] text-[#8b947f] opacity-60 sm:h-9 sm:w-9"
       >
         <svg
           aria-hidden="true"
-          className={`h-4 w-4 ${isSyncPending ? "animate-spin" : ""}`}
+          className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

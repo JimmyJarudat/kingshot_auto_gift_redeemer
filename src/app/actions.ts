@@ -14,21 +14,6 @@ export type GameAccountProfile = {
   totalRechargeAmount: number | null;
 };
 
-type LoginResponse = {
-  code: number;
-  data?: {
-    fid?: number;
-    nickname?: string;
-    kid?: number;
-    stove_lv?: number;
-    stove_lv_content?: string | number;
-    avatar_image?: string;
-    total_recharge_amount?: number;
-  };
-  msg?: string;
-  err_code?: string;
-};
-
 type GiftCodeResponse = {
   code?: number;
   data?: {
@@ -37,10 +22,6 @@ type GiftCodeResponse = {
   msg?: string;
   err_code?: number | string;
 };
-
-function cleanNickname(nickname: string | undefined) {
-  return nickname?.replace(/\u2800/g, "").trim() || null;
-}
 
 function normalizePlayerId(value: FormDataEntryValue | string | null) {
   return String(value ?? "")
@@ -70,55 +51,17 @@ function signParams(params: Record<string, string>) {
 
   const raw = Object.keys(params)
     .sort()
-    .map((key) => `${key}=${params[key]}`)
+    .map((key) => `${key}=${encodeURIComponent(params[key])}`)
     .join("&");
 
   return createHash("md5").update(raw + secretKey, "utf8").digest("hex");
 }
 
-async function fetchGameProfile(playerId: string) {
-  const playerParams = {
-    fid: playerId,
-    time: String(Date.now()),
-  };
-  const sign = signParams(playerParams);
-  const body = new URLSearchParams({
-    sign,
-    ...playerParams,
-  });
-
-  const response = await fetch("https://kingshot-giftcode.centurygame.com/api/player", {
-    method: "POST",
-    headers: {
-      accept: "application/json, text/plain, */*",
-      "content-type": "application/x-www-form-urlencoded",
-      origin: "https://ks-giftcode.centurygame.com",
-      referer: "https://ks-giftcode.centurygame.com/",
-      "user-agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0 Safari/537.36",
-    },
-    body,
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to login game account");
-  }
-
-  const payload = (await response.json()) as LoginResponse;
-
-  if (payload.code !== 0 || !payload.data) {
-    throw new Error(payload.msg || "Game login failed");
-  }
-
-  return payload.data;
-}
-
-async function redeemGiftCode(playerId: string, giftCode: string) {
+async function redeemGiftCode(playerId: string, kingdomId: string, giftCode: string) {
   const redeemParams = {
     fid: playerId,
+    kid: kingdomId,
     cdk: giftCode,
-    captcha_code: "",
     time: String(Math.floor(Date.now() / 1000)),
   };
   const sign = signParams(redeemParams);
@@ -157,8 +100,12 @@ function mapRedeemStatus(payload: GiftCodeResponse) {
     return "success";
   }
 
+  if (errCode === 40008) {
+    return "success";
+  }
+
   if (message === "RECEIVED." || message === "RECEIVED") {
-    return "already_redeemed";
+    return "success";
   }
 
   if ([40001, 40003, 40007].includes(errCode)) {
@@ -172,31 +119,12 @@ function mapRedeemStatus(payload: GiftCodeResponse) {
   return "failed";
 }
 
-function mapLoginDataToProfile(
-  profile: NonNullable<LoginResponse["data"]>,
-  fallbackPlayerId: string,
-) {
-  return {
-    playerId: profile.fid ? String(profile.fid) : fallbackPlayerId,
-    nickname: cleanNickname(profile.nickname),
-    kid: profile.kid ?? null,
-    stoveLv: profile.stove_lv ?? null,
-    stoveLvContent: normalizeImageUrl(profile.stove_lv_content),
-    avatarImage: normalizeImageUrl(profile.avatar_image),
-    totalRechargeAmount: profile.total_recharge_amount ?? null,
-  } satisfies GameAccountProfile;
-}
+export async function searchGameAccount(
+  playerIdInput: string,
+): Promise<GameAccountProfile> {
+  normalizePlayerId(playerIdInput);
 
-export async function searchGameAccount(playerIdInput: string) {
-  const playerId = normalizePlayerId(playerIdInput);
-
-  if (!playerId) {
-    throw new Error("Player ID is required");
-  }
-
-  const profile = await fetchGameProfile(playerId);
-
-  return mapLoginDataToProfile(profile, playerId);
+  throw new Error("Player lookup is currently unavailable after the Kingshot redeem update.");
 }
 
 export async function importGameAccount(profile: GameAccountProfile) {
@@ -259,33 +187,8 @@ export async function updateGameAccountStatus(playerIdInput: string, isActive: b
 }
 
 export async function syncGameAccount(playerIdInput: string) {
-  const playerId = normalizePlayerId(playerIdInput);
-
-  if (!playerId) {
-    throw new Error("Player ID is required");
-  }
-
-  const loginData = await fetchGameProfile(playerId);
-  const profile = mapLoginDataToProfile(loginData, playerId);
-
-  await prisma.game_accounts.update({
-    where: {
-      player_id: playerId,
-    },
-    data: {
-      player_id: profile.playerId,
-      nickname: profile.nickname,
-      server_id: profile.kid ? String(profile.kid) : null,
-      kid: profile.kid,
-      stove_lv: profile.stoveLv,
-      stove_lv_content: profile.stoveLvContent,
-      avatar_image: profile.avatarImage,
-      total_recharge_amount: profile.totalRechargeAmount,
-      updated_at: new Date(),
-    },
-  });
-
-  revalidatePath("/");
+  normalizePlayerId(playerIdInput);
+  throw new Error("Profile sync is currently unavailable after the Kingshot redeem update.");
 }
 
 export async function deleteGameAccount(playerIdInput: string) {
@@ -365,9 +268,14 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
       select: {
         id: true,
         is_active: true,
+        server_id: true,
+        kid: true,
       },
     }),
     prisma.gift_codes.findFirst({
+      where: {
+        status: "active",
+      },
       orderBy: {
         first_seen_at: "desc",
       },
@@ -385,6 +293,12 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
 
   if (!account.is_active) {
     throw new Error("Player is inactive");
+  }
+
+  const kingdomId = account.server_id?.trim() || (account.kid ? String(account.kid) : "");
+
+  if (!kingdomId) {
+    throw new Error(`Missing Kingdom/server_id for player ${playerId}`);
   }
 
   if (!latestGiftCode) {
@@ -458,8 +372,7 @@ export async function sendLatestGiftCodeToPlayer(playerIdInput: string) {
       });
 
   try {
-    await fetchGameProfile(playerId);
-    const payload = await redeemGiftCode(playerId, latestGiftCode.code);
+    const payload = await redeemGiftCode(playerId, kingdomId, latestGiftCode.code);
     const status = mapRedeemStatus(payload);
     const processedAt = new Date();
 

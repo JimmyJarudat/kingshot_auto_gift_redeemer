@@ -50,14 +50,50 @@ function getSafeImageUrl(value: string | null) {
 function normalizeRedemptionStatus(status: string, responseMessage: string | null) {
   const message = responseMessage?.trim().toUpperCase();
 
-  if (
-    status.toLowerCase() === "failed" &&
-    (message === "RECEIVED." || message === "RECEIVED")
-  ) {
+  if (message === "RECEIVED." || message === "RECEIVED") {
     return "already_redeemed";
   }
 
   return status.toLowerCase();
+}
+
+function getResponseErrCode(responseData: unknown) {
+  if (!responseData || typeof responseData !== "object") {
+    return null;
+  }
+
+  const data = responseData as {
+    err_code?: unknown;
+    data?: {
+      err_code?: unknown;
+    };
+  };
+  const errCode = data.err_code ?? data.data?.err_code;
+
+  if (typeof errCode === "number") {
+    return errCode;
+  }
+
+  if (typeof errCode === "string") {
+    const parsed = Number(errCode);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function normalizeRedemptionStatusFromResponse(
+  status: string,
+  responseMessage: string | null,
+  responseData: unknown,
+) {
+  const errCode = getResponseErrCode(responseData);
+
+  if (errCode === 40008) {
+    return "already_redeemed";
+  }
+
+  return normalizeRedemptionStatus(status, responseMessage);
 }
 
 export default async function Home() {
@@ -96,6 +132,7 @@ export default async function Home() {
             game_account_id: true,
             status: true,
             response_message: true,
+            response_data: true,
           },
         },
       },
@@ -105,9 +142,10 @@ export default async function Home() {
   const latestRedemptionsByAccount = new Map(
     latestGiftCode?.gift_code_redemptions.map((redemption) => [
       redemption.game_account_id,
-      normalizeRedemptionStatus(
+      normalizeRedemptionStatusFromResponse(
         redemption.status,
         redemption.response_message,
+        redemption.response_data,
       ),
     ]) ?? [],
   );
