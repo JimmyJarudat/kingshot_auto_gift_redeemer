@@ -283,7 +283,7 @@ export default async function Home() {
         </section>
 
         <div className="overflow-hidden rounded-lg border border-[#d9ddcf] bg-white/90 shadow-sm backdrop-blur-[1px]">
-          <div className="hidden gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] sm:grid sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]">
+          <div className="hidden gap-4 border-b border-[#e5e8df] bg-[#eef1e8] px-4 py-3 text-xs font-semibold uppercase text-[#667055] min-[1100px]:grid min-[1100px]:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px]">
             <span>Avatar</span>
             <span>In-game name</span>
             <span>User ID</span>
@@ -294,13 +294,13 @@ export default async function Home() {
           </div>
 
           {players.length > 0 ? (
-            <div className="space-y-3 bg-[#eef1e8]/70 p-3 sm:space-y-0 sm:divide-y sm:divide-[#edf0e8] sm:bg-transparent sm:p-0">
+            <div className="space-y-3 bg-[#eef1e8]/70 p-3 min-[1100px]:space-y-0 min-[1100px]:divide-y min-[1100px]:divide-[#edf0e8] min-[1100px]:bg-transparent min-[1100px]:p-0">
               {players.map((player) => (
               <article
-                className="grid gap-3 rounded-lg border border-[#d9ddcf] bg-white px-3 py-3 shadow-sm transition-colors hover:bg-[#fafbf7] sm:rounded-none sm:border-0 sm:bg-transparent sm:px-4 sm:py-4 sm:shadow-none sm:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px] sm:items-center"
+                className="grid gap-3 rounded-lg border border-[#d9ddcf] bg-white px-3 py-3 shadow-sm transition-colors hover:bg-[#fafbf7] min-[1100px]:rounded-none min-[1100px]:border-0 min-[1100px]:bg-transparent min-[1100px]:px-4 min-[1100px]:py-4 min-[1100px]:shadow-none min-[1100px]:grid-cols-[88px_1.1fr_0.9fr_105px_145px_115px_132px] min-[1100px]:items-center"
                 key={player.id}
               >
-                <div className="grid grid-cols-[68px_1fr] gap-3 sm:contents">
+                <div className="grid grid-cols-[68px_1fr] gap-3 min-[1100px]:contents">
                   <Image
                     src={player.avatar}
                     alt={`${player.name} profile avatar`}
@@ -309,7 +309,7 @@ export default async function Home() {
                     className="h-16 w-16 rounded-md border border-[#d8ddcf] bg-[#f3f5ed]"
                     priority
                   />
-                  <div className="grid min-w-0 grid-cols-[1fr_auto] gap-x-3 gap-y-2 sm:block">
+                  <div className="grid min-w-0 grid-cols-[1fr_auto] gap-x-3 gap-y-2 min-[1100px]:block">
                     <div className="min-w-0">
                       <h2 className="truncate text-lg font-semibold text-[#171a12]">
                         {player.name}
@@ -319,14 +319,14 @@ export default async function Home() {
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 self-start rounded-md border px-2.5 py-1 text-xs font-semibold sm:hidden ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
+                      className={`shrink-0 self-start rounded-md border px-2.5 py-1 text-xs font-semibold min-[1100px]:hidden ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
                     >
                       {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
                     </span>
-                    <p className="min-w-0 break-all font-mono text-xs text-[#4d5740] sm:hidden">
+                    <p className="min-w-0 break-all font-mono text-xs text-[#4d5740] min-[1100px]:hidden">
                       {player.id}
                     </p>
-                    <div className="flex items-end justify-end gap-2 self-end justify-self-end sm:hidden">
+                    <div className="flex items-end justify-end gap-2 self-end justify-self-end min-[1100px]:hidden">
                       <div className="flex flex-col items-end gap-1">
                         <StatusToggle
                           playerId={player.id}
@@ -345,10 +345,10 @@ export default async function Home() {
                     </div>
                   </div>
                 </div>
-                <p className="hidden break-all font-mono text-sm text-[#384030] sm:block">
+                <p className="hidden break-all font-mono text-sm text-[#384030] min-[1100px]:block">
                   {player.id}
                 </p>
-                <div className="hidden items-center gap-2 text-sm font-medium text-[#384030] sm:flex">
+                <div className="hidden items-center gap-2 text-sm font-medium text-[#384030] min-[1100px]:flex">
                   <span>{player.stoveLevel ? `Lv. ${player.stoveLevel}` : "-"}</span>
                   {player.stoveLvContent ? (
                     <Image
@@ -360,14 +360,14 @@ export default async function Home() {
                     />
                   ) : null}
                 </div>
-                <div className="hidden sm:block">
+                <div className="hidden min-[1100px]:block">
                   <span
                     className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${redemptionStyles[player.latestGiftStatus] ?? redemptionStyles.not_sent}`}
                   >
                     {redemptionLabels[player.latestGiftStatus] ?? "Not Sent"}
                   </span>
                 </div>
-                <div className="hidden items-center gap-3 sm:flex">
+                <div className="hidden items-center gap-3 min-[1100px]:flex">
                   <StatusToggle
                     playerId={player.id}
                     isActive={player.isActive}
@@ -376,7 +376,7 @@ export default async function Home() {
                     {player.isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
-                <div className="hidden sm:block">
+                <div className="hidden min-[1100px]:block">
                   <RowActions
                     playerId={player.id}
                     latestGiftStatus={player.latestGiftStatus}
