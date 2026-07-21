@@ -9,7 +9,7 @@
       "typeVersion": 1,
       "position": [
         304,
-        2800
+        2864
       ]
     },
     {
@@ -339,19 +339,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 2,
-              "triggerAtMinute": 5
-            },
-            {
-              "triggerAtHour": 8,
-              "triggerAtMinute": 5
-            },
-            {
-              "triggerAtHour": 14,
-              "triggerAtMinute": 5
-            },
-            {
-              "triggerAtHour": 20,
+              "field": "hours",
               "triggerAtMinute": 5
             }
           ]
@@ -365,6 +353,21 @@
       ],
       "id": "5a2ae9dc-a7e8-4f33-861b-e2ac934ecb45",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "path": "sent-all",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        288,
+        2416
+      ],
+      "id": "f529979e-6789-4e2d-a49f-9c10ca8bfee9",
+      "name": "Webhook",
+      "webhookId": "c35d2814-1c1e-491f-a119-598049f5ac53"
     }
   ],
   "pinData": {},
@@ -529,6 +532,17 @@
           }
         ]
       ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Claim One Pending Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -537,7 +551,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "4565bba5-fbd8-43e9-b2d7-dda280b4779c",
+  "versionId": "b0e9db55-46a3-4e1c-bc5a-703b3e70c0e8",
   "meta": {
     "instanceId": "1b6934095a36b38b484ba73e9555d1c823660b565e517abf6d8458f98723c378"
   },
