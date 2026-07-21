@@ -25,14 +25,12 @@ export function RefreshGiftCodesButton() {
       const result = await refreshGiftCodes();
       setHasError(!result.ok);
       setStatusCode(result.status);
-      router.refresh();
 
       if (result.ok) {
-        for (const delay of [2000, 4000, 6000, 8000]) {
-          await wait(delay);
-          router.refresh();
-        }
+        await wait(5000);
       }
+
+      router.refresh();
     } finally {
       setIsRefreshing(false);
     }
