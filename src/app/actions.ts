@@ -249,6 +249,48 @@ export async function importGameAccount(profile: GameAccountProfile) {
   revalidatePath("/");
 }
 
+export async function addGameAccountManually(formData: {
+  playerId: string;
+  serverId: string;
+  nickname?: string;
+}) {
+  const playerId = normalizePlayerId(formData.playerId);
+  const serverId = String(formData.serverId ?? "").trim();
+  const nickname = String(formData.nickname ?? "").trim();
+  const parsedKid = Number(serverId);
+
+  if (!playerId) {
+    throw new Error("Player ID is required");
+  }
+
+  if (!serverId) {
+    throw new Error("Server is required");
+  }
+
+  const now = new Date();
+
+  await prisma.game_accounts.upsert({
+    where: {
+      player_id: playerId,
+    },
+    create: {
+      player_id: playerId,
+      nickname: nickname || null,
+      server_id: serverId,
+      kid: Number.isInteger(parsedKid) ? parsedKid : null,
+      updated_at: now,
+    },
+    update: {
+      nickname: nickname || null,
+      server_id: serverId,
+      kid: Number.isInteger(parsedKid) ? parsedKid : null,
+      updated_at: now,
+    },
+  });
+
+  revalidatePath("/");
+}
+
 export async function updateGameAccountStatus(playerIdInput: string, isActive: boolean) {
   const playerId = normalizePlayerId(playerIdInput);
 

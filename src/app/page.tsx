@@ -218,11 +218,11 @@ export default async function Home() {
           </div>
         </header>
 
-        <div className="rounded-lg border border-[#caa35a]/70 bg-[#171a12]/90 px-4 py-3 shadow-sm ring-1 ring-white/10 sm:hidden">
-          <h1 className="text-xl font-semibold text-[#fff8df]">
+        <div className="-mt-3 border-l-4 border-[#caa35a] pl-4 sm:hidden">
+          <h1 className="text-2xl font-semibold text-[#171a12] drop-shadow-[0_1px_0_rgba(255,255,255,0.65)]">
             KON Gift Redeemer
           </h1>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#d7bd78]">
+          <p className="mt-1 inline-flex rounded bg-[#171a12]/90 px-2 py-1 text-xs font-semibold uppercase text-[#fff8df] shadow-sm ring-1 ring-[#caa35a]/60">
             KILLERSofNIGHT Alliance
           </p>
         </div>
