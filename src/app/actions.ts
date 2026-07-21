@@ -23,6 +23,21 @@ type GiftCodeResponse = {
   err_code?: number | string;
 };
 
+type PlayerApiResponse = {
+  code?: number;
+  data?: {
+    fid?: number | string;
+    nickname?: string | null;
+    kid?: number | string | null;
+    stove_lv?: number | string | null;
+    stove_lv_content?: string | number | null;
+    avatar_image?: string | null;
+    total_recharge_amount?: number | string | null;
+  };
+  msg?: string;
+  err_code?: number | string;
+};
+
 function normalizePlayerId(value: FormDataEntryValue | string | null) {
   return String(value ?? "")
     .replace(/\D/g, "")
@@ -91,6 +106,54 @@ async function redeemGiftCode(playerId: string, kingdomId: string, giftCode: str
   return (await response.json()) as GiftCodeResponse;
 }
 
+async function fetchPlayerProfile(playerId: string) {
+  const playerParams = {
+    fid: playerId,
+    time: String(Date.now()),
+  };
+  const sign = signParams(playerParams);
+  const body = new URLSearchParams({
+    sign,
+    ...playerParams,
+  });
+
+  const response = await fetch("https://kingshot-giftcode.centurygame.com/api/player", {
+    method: "POST",
+    headers: {
+      accept: "application/json, text/plain, */*",
+      "content-type": "application/x-www-form-urlencoded",
+      origin: "https://ks-giftcode.centurygame.com",
+      referer: "https://ks-giftcode.centurygame.com/",
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0 Safari/537.36",
+    },
+    body,
+    cache: "no-store",
+  });
+
+  const text = await response.text();
+  let payload: PlayerApiResponse | string;
+
+  try {
+    payload = JSON.parse(text) as PlayerApiResponse;
+  } catch {
+    payload = text;
+  }
+
+  console.log("[add-player:/api/player]", {
+    ok: response.ok,
+    status: response.status,
+    playerId,
+    payload,
+  });
+
+  if (!response.ok || typeof payload === "string" || Number(payload.code) !== 0) {
+    throw new Error("Failed to login game account");
+  }
+
+  return payload;
+}
+
 function mapRedeemStatus(payload: GiftCodeResponse) {
   const code = Number(payload.code ?? -1);
   const errCode = Number(payload.err_code ?? payload.data?.err_code ?? -1);
@@ -122,9 +185,29 @@ function mapRedeemStatus(payload: GiftCodeResponse) {
 export async function searchGameAccount(
   playerIdInput: string,
 ): Promise<GameAccountProfile> {
-  normalizePlayerId(playerIdInput);
+  const playerId = normalizePlayerId(playerIdInput);
 
-  throw new Error("Player lookup is currently unavailable after the Kingshot redeem update.");
+  if (!playerId) {
+    throw new Error("Player ID is required");
+  }
+
+  const payload = await fetchPlayerProfile(playerId);
+  const data = payload.data;
+
+  if (!data) {
+    throw new Error("Player profile was not found");
+  }
+
+  return {
+    playerId: String(data.fid ?? playerId),
+    nickname: data.nickname ?? null,
+    kid: data.kid == null ? null : Number(data.kid),
+    stoveLv: data.stove_lv == null ? null : Number(data.stove_lv),
+    stoveLvContent: normalizeImageUrl(data.stove_lv_content),
+    avatarImage: normalizeImageUrl(data.avatar_image),
+    totalRechargeAmount:
+      data.total_recharge_amount == null ? null : Number(data.total_recharge_amount),
+  };
 }
 
 export async function importGameAccount(profile: GameAccountProfile) {
