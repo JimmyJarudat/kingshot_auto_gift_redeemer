@@ -4,24 +4,29 @@ import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addGameAccountManually } from "@/app/actions";
 
+const DEFAULT_SERVER_ID = "1647";
+
 type AddPlayerModalProps = {
   triggerVariant?: "default" | "mobile";
 };
 
 export function AddPlayerModal({ triggerVariant = "default" }: AddPlayerModalProps) {
+  const isDevelopment = process.env.NODE_ENV === "development";
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [playerId, setPlayerId] = useState("");
-  const [serverId, setServerId] = useState("");
+  const [serverId, setServerId] = useState(DEFAULT_SERVER_ID);
   const [nickname, setNickname] = useState("");
+  const [avatarImage, setAvatarImage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function closeModal() {
     setIsOpen(false);
     setPlayerId("");
-    setServerId("");
+    setServerId(DEFAULT_SERVER_ID);
     setNickname("");
+    setAvatarImage("");
     setError(null);
   }
 
@@ -35,6 +40,7 @@ export function AddPlayerModal({ triggerVariant = "default" }: AddPlayerModalPro
           playerId,
           serverId,
           nickname,
+          avatarImage: isDevelopment ? avatarImage : "",
         });
         router.refresh();
         closeModal();
@@ -158,6 +164,21 @@ export function AddPlayerModal({ triggerVariant = "default" }: AddPlayerModalPro
                   className="h-11 rounded-md border border-[#cfd8bc] bg-[#fbfcf8] px-3 text-base text-[#171a12] outline-none transition-colors placeholder:text-[#8a927d] focus:border-[#748a4d]"
                 />
               </label>
+
+              {isDevelopment ? (
+                <label className="flex min-w-0 flex-col gap-2">
+                  <span className="text-sm font-semibold text-[#384030]">
+                    Profile Image URL
+                  </span>
+                  <input
+                    value={avatarImage}
+                    onChange={(event) => setAvatarImage(event.target.value)}
+                    type="url"
+                    placeholder="https://..."
+                    className="h-11 rounded-md border border-[#cfd8bc] bg-[#fbfcf8] px-3 text-base text-[#171a12] outline-none transition-colors placeholder:text-[#8a927d] focus:border-[#748a4d]"
+                  />
+                </label>
+              ) : null}
 
               {error ? (
                 <p className="rounded-md border border-[#e8c9bd] bg-[#fff5f0] px-3 py-2 text-sm text-[#8c3f25]">

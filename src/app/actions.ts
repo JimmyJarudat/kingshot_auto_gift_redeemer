@@ -253,10 +253,12 @@ export async function addGameAccountManually(formData: {
   playerId: string;
   serverId: string;
   nickname?: string;
+  avatarImage?: string;
 }) {
   const playerId = normalizePlayerId(formData.playerId);
   const serverId = String(formData.serverId ?? "").trim();
   const nickname = String(formData.nickname ?? "").trim();
+  const avatarImage = normalizeImageUrl(formData.avatarImage);
   const parsedKid = Number(serverId);
 
   if (!playerId) {
@@ -278,12 +280,14 @@ export async function addGameAccountManually(formData: {
       nickname: nickname || null,
       server_id: serverId,
       kid: Number.isInteger(parsedKid) ? parsedKid : null,
+      avatar_image: avatarImage,
       updated_at: now,
     },
     update: {
       nickname: nickname || null,
       server_id: serverId,
       kid: Number.isInteger(parsedKid) ? parsedKid : null,
+      avatar_image: avatarImage,
       updated_at: now,
     },
   });
